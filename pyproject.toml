@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "rgov"
+version = "0.1.0"
+description = ""
+authors = ["Jordan Sweet <jsbmgcontact@protonmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+lxml = "^4.6.3"
+python-lsp-server = "^1.0.1"
+python-language-server = "^0.36.2"
+requests = "^2.25.1"
+grequests = "^0.6.0"
+html5lib = "^1.1"
+fake-useragent = "^0.1.11"
+cleo = "^0.8.1"
+numpy = "^1.21.0"
+python-daemon = "^2.3.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.4"
+
+[tool.poetry.scripts]
+rgov = "rgov.application:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
