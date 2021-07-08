@@ -1,11 +1,10 @@
 * rgov - Recreation.gov Campground Checker
 
 [[http://www.gnu.org/licenses/gpl-3.0][https://img.shields.io/badge/License-GPL%20v3-blue.svg]]
-
 ** About
 
 =rgov= is a command line program to check for campground availability on
-Recreation.gov. While other recreation.gov "checkers" exist, this one aims to
+Recreation.gov. While other recreation.gov scrapers exist, this one aims to
 also provide a simple search command for quickly finding the campsite ids that
 are necessary for checking campgrounds. It also includes a daemon to check for
 availability automatically.
@@ -94,3 +93,6 @@ You can add the descriptions to the search index like this:
 For any reason, you can remove the descriptions with:
 
 =$ rgov reindex=
+
+** Roadmap
+*** [ ] Improve or add ways for the daemon to notify the user on success
