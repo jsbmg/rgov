@@ -21,18 +21,18 @@ With pip:
 
 First, find your desired campground's id, usually a six-digit number:
 
-=$ pandcamp search <campground>=
+=$ rgov search <campground>=
 
 You can also find this number in the url of the campgound page on Recreation.gov.
 
 To check if there are available sites (separate multiple ids with spaces):
 
-=$ pandcamp check <campground id(s)> --date <mm-dd-yyyy> --length <number of nights>=
+=$ rgov check <campground id(s)> --date <mm-dd-yyyy> --length <number of nights>=
 
 If there aren't, you can run automated checks. Start the daemon with your
 preferred method of notification:
 
-=$ pandcamp daemon <campground id(s)> --date <...> --length <...> --command <your command>=
+=$ rgov daemon <campground id(s)> --date <...> --length <...> --command <your command>=
 
 This will check every five minutes.
 

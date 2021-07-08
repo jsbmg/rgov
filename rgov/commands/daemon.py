@@ -23,7 +23,7 @@ the check command, the daemon command defaults to the current date with a three
 nights stay. The following example checks for a three night stay starting on
 October 12, 2021 at Laguna:
 
-<info>pandcamp daemon 232279 -date 10-12-2021 -length 3</info>
+<info>rgov daemon 232279 -date 10-12-2021 -length 3</info>
 
 Campground ids can be found using the <info>search</info> command.
 
@@ -85,7 +85,7 @@ option.
         else:
             notifier = "notify-send"
 
-        self.line("<fg=magenta>Pandcamp daemon started.</fg=magenta>")
+        self.line("<fg=magenta>Rgov daemon started.</fg=magenta>")
 
         with daemon.DaemonContext():
             while True:
@@ -93,7 +93,7 @@ option.
                     try:
                         campground_name, available_sites = self.main(campground_id)
                     except UnboundLocalError:
-                        run([notifier, "Pandcamp", f"{campground_id} - invalid id!"])
+                        run([notifier, "Rgov", f"{campground_id} - invalid id!"])
                         continue
                     if len(available_sites) >= 1:
                         if self.option("notifier"):

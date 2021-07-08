@@ -24,7 +24,7 @@ By default, the keywords are matched against campground names. The<comment>
 this options requires that the search index be rebuilt (see the
 <info>reindex</info> command). This can be done with:
 
-<info>pandcamp reindex --with-descriptions</info>.
+<info>rgov reindex --with-descriptions</info>.
 """
 
     def handle(self):
@@ -59,5 +59,5 @@ this options requires that the search index be rebuilt (see the
             except IndexError:
                 error_string = ("<fg=red>Description searches "
                                 "are disabled.</fg=red>\nEnable with "
-                                "<info>pandcamp reindex --with-descriptions</info>.")
+                                "<info>rgov reindex --with-descriptions</info>.")
                 self.line(error_string)

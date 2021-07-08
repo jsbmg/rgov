@@ -32,12 +32,12 @@ class CheckCommand(check_command.CheckCommand):
 dates of stay and prints the results to the terminal. The following example
 checks for a three night stay starting on October 12, 2021 at Laguna:
 
-<info>pandcamp check 232279 -date 10-12-2021 -length 3</info>
+<info>rgov check 232279 -date 10-12-2021 -length 3</info>
 
 Campground ids can be found using <info>search</info> command. To check multiple
 campgrounds, separate the campground ids with spaces:
 
-<info>pandcamp check 232279 232278</info>
+<info>rgov check 232279 232278</info>
 
 Unless otherwise specified, the command checks for the current date and a
 length of stay of three days. The <comment>--url</comment> option prints the
