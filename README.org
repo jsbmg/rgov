@@ -94,5 +94,7 @@ For any reason, you can remove the descriptions with:
 =$ rgov reindex=
 
 ** Roadmap
+
 [ ] Improve or add ways for the daemon to notify the user on success
+
 [ ] Add better tests
