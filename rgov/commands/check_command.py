@@ -10,6 +10,7 @@ from rgov.commands import paths
 
 
 class CheckCommand(Command):
+
     base_url = "https://www.recreation.gov/api/camps/availability/campground/"
     headers = {"User-Agent": UserAgent().random}
     human_time_format = "%m/%d/%y"
