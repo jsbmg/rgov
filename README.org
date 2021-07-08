@@ -54,7 +54,7 @@ you can search in the campground descriptions like this:
 The check command quickly searches campgrouns for availability and prints which
 sites are available, if any.
 
-=$ rgov check <campground id(s)> -date <mm-dd-YY> -length <nights>=
+=$ rgov check <campground id(s)> -date <mm-dd-yyyy> -length <nights>=
 
 **** Options
 
@@ -69,7 +69,7 @@ checks for availability every five minutes in the background. The method of
 notification is up to you, and can either be a notification program or custom
 shell command.
 
-=$ rgov daemon <campground id(s)> --date <mm-dd-YY> --length <nights> --notifier <notification program> --command <shell command>=
+=$ rgov daemon <campground id(s)> --date <mm-dd-yyyy> --length <nights> --notifier <notification program> --command <shell command>=
 
 **** Options
 
