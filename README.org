@@ -21,9 +21,9 @@ $ =pip install rgov=
 
 ** Quick Start
 
-First, find your campground's id (usually a six-digit number):
+First, find your campgrounds id (usually a six-digit number):
 
-=$ rgov search <campground>=
+$ =rgov search <campground>=
 
 You can also find the id in the url of the campgound's page on Recreation.gov.
 
@@ -99,5 +99,7 @@ $ =rgov reindex=
 ** Roadmap
 
 [ ] Make better ways for the daemon to notify on success
+
+[ ] Show all sites with availability in the daemon notification, not just one
 
 [ ] Add more tests
