@@ -113,4 +113,4 @@ class CheckCommand(Command):
         try:
             return campground_name, available_sites
         except UnboundLocalError as e:
-           raise UnboundLocalError('Invalid campground ID')
+            raise UnboundLocalError('Invalid campground ID')
