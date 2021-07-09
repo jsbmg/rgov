@@ -96,10 +96,8 @@ For any reason, you can remove the descriptions with:
 
 $ =rgov reindex=
 
-** Roadmap
+** Todo
 
-[ ] Make better ways for the daemon to notify on success
+[ ] Add additionally ways for notifications to be sent (e.g. phone/email)
 
-[ ] Show all sites with availability in the daemon notification, not just one
-
-[ ] Add more tests
+[ ] Write more testing
