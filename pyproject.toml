@@ -3,6 +3,8 @@ name = "rgov"
 version = "0.2.0"
 description = "Check if campsites are available on Recreation.gov"
 authors = ["Jordan Sweet <jsbmgcontact@protonmail.com>"]
+license = "GPL-3.0-only"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.6"
