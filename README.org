@@ -73,7 +73,7 @@ checks for availability every five minutes in the background. The method of
 notification is up to you, and can either be a notification program or custom
 shell command.
 
-=$ rgov daemon <campground id(s)> --date <mm-dd-yyyy> --length <nights> --notifier <notification program> --command <shell command>=
+$ =rgov daemon <campground id(s)> --date <mm-dd-yyyy> --length <nights> --notifier <notification program> --command <shell command>=
 
 **** Options
 

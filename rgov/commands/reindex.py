@@ -15,7 +15,7 @@ class UpdateIndexCommand(Command):
     name = "reindex"
     description = "Update the campground id search index"
 
-    help = """ The <info>reindex</info> command downloads facility data from
+    help = """The <info>reindex</info> command downloads facility data from
 recreation.gov and builds a searchable database from that.
 
 By default, the database is built with campground names and ids. The<comment>
