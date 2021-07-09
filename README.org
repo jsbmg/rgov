@@ -98,6 +98,6 @@ $ =rgov reindex=
 
 ** Todo
 
-[ ] Add additionally ways for notifications to be sent (e.g. phone/email)
+[ ] Add additional ways for notifications to be sent (e.g. phone/email)
 
 [ ] Write more testing
