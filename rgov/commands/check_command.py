@@ -23,6 +23,7 @@ class CheckCommand(Command):
 
         Raises:
             UnboundLocalError: When the campground id is not recognized
+            ValueError: when the date or length values are incorrect
         """
         # Get the name of the campground from the id. Iterates through the csv
         # until the id matches and assign the campground_name variable to the
