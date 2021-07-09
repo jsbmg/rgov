@@ -12,6 +12,7 @@ from rgov.commands import check_command
 # TODO add to or better the notification method(s) (e.g. signal, email, twitter, phone, etc)
 # TODO show in notifications all campgrounds with availability, not just one or something vague
 
+
 class DaemonCommand(check_command.CheckCommand):
 
     name = "daemon"
@@ -74,7 +75,8 @@ option.
             "c",
             "The command to run if an availability is found",
             flag=False,
-            value_required=True),
+            value_required=True,
+        ),
     ]
 
     def handle(self):
@@ -101,8 +103,7 @@ option.
                         continue
                 for campground_name, num_sites in results.items():
                     if num_sites >= 1:
-                        line = (f"{campground_name} - "
-                                f"{num_sites} site(s) available")
+                        line = f"{campground_name} - " f"{num_sites} site(s) available"
                         notification.append(line)
                         notify = True
                 if notify == True:
@@ -112,9 +113,9 @@ option.
                         command = self.option("command")
                         Popen(command, shell=True)
                     if self.option("forever"):
-                            pass
+                        pass
                     else:
                         import sys
                         sys.exit()
 
-                time.sleep(300) # 5 minutes until next check
+                time.sleep(300)  # 5 minutes until next check

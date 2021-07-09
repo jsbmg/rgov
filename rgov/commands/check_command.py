@@ -40,8 +40,9 @@ class CheckCommand(Command):
             try:
                 arrival_date = datetime.datetime.strptime(date_input, "%m-%d-%Y")
             except ValueError:
-                date_error_line = (f'"{date_input}" is not a valid date'
-                              ' in the form mm-dd-yyyy')
+                date_error_line = (
+                    f'"{date_input}" is not a valid date' " in the form mm-dd-yyyy"
+                )
                 raise ValueError(date_error_line)
         else:
             arrival_date = datetime.date.today()
@@ -50,7 +51,7 @@ class CheckCommand(Command):
             try:
                 length_of_stay = int(length_input)
             except ValueError:
-                length_error_line = (f'"{length_input}" is not an integer')
+                length_error_line = f'"{length_input}" is not an integer'
                 raise ValueError(length_error_line)
         else:
             length_of_stay = 3
@@ -114,4 +115,4 @@ class CheckCommand(Command):
         try:
             return campground_name, available_sites
         except UnboundLocalError as e:
-            raise UnboundLocalError('Invalid campground ID')
+            raise UnboundLocalError("Invalid campground ID")

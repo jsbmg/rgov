@@ -6,7 +6,7 @@ from rgov.commands import daemon, check_command
 
 application = Application()
 application.add(daemon.DaemonCommand())
-command = application.find('daemon')
+command = application.find("daemon")
 tester = CommandTester(command)
 
 

@@ -2,14 +2,13 @@ from cleo.helpers import argument, option
 
 from rgov.commands import check_command
 
+
 class CheckCommand(check_command.CheckCommand):
 
     name = "check"
     description = "Check a campground for availability"
 
-    arguments = [
-        argument("id", "The campground id(s) to check", multiple=True)
-    ]
+    arguments = [argument("id", "The campground id(s) to check", multiple=True)]
     options = [
         option(
             "length",
@@ -52,8 +51,10 @@ url along with the results for quickly navigating to the reservation web page.
             try:
                 campground_name, available_sites = self.main(campground_id)
             except UnboundLocalError:
-                invalid_id_line = (f"<fg=red> \u2022 <info>{campground_id}</info> "
-                                   f"is not a valid campground id</fg=red>")
+                invalid_id_line = (
+                    f"<fg=red> \u2022 <info>{campground_id}</info> "
+                    f"is not a valid campground id</fg=red>"
+                )
                 self.line(invalid_id_line)
                 continue
 
@@ -68,11 +69,15 @@ url along with the results for quickly navigating to the reservation web page.
             else:
                 result_string = "<fg=yellow>No sites available</fg=yellow>"
 
-            result_line = (f"<question> \u2022 {campground_name}</question> - "
-                           f"<fg=cyan>{result_string}</fg=cyan>")
-            url_line = (f"<fg=green>   "
-                        "https://www.recreation.gov/camping/campgrounds/"
-                        f"{campground_id}/availability</fg=green>")
+            result_line = (
+                f"<question> \u2022 {campground_name}</question> - "
+                f"<fg=cyan>{result_string}</fg=cyan>"
+            )
+            url_line = (
+                f"<fg=green>   "
+                "https://www.recreation.gov/camping/campgrounds/"
+                f"{campground_id}/availability</fg=green>"
+            )
 
             self.line(result_line)
             if self.option("url"):

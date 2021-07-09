@@ -6,7 +6,7 @@ from rgov.commands import check
 
 application = Application()
 application.add(check.CheckCommand())
-command = application.find('check')
+command = application.find("check")
 tester = CommandTester(command)
 
 

@@ -51,13 +51,17 @@ this options requires that the search index be rebuilt (see the
                         if term in row[target_column]:
                             count += 1
                             if count == num_search_terms:
-                                self.line(f"<question>{row[1].title()}</question>"
-                                          f" - <info>{row[0]}</info>")
+                                self.line(
+                                    f"<question>{row[1].title()}</question>"
+                                    f" - <info>{row[0]}</info>"
+                                )
 
             # This error occurs when description option is passed but the csv
             # isn't built with the descriptions included.
             except IndexError:
-                error_string = ("<fg=red>Description searches "
-                                "are disabled.</fg=red>\nEnable with "
-                                "<info>rgov reindex --with-descriptions</info>.")
+                error_string = (
+                    "<fg=red>Description searches "
+                    "are disabled.</fg=red>\nEnable with "
+                    "<info>rgov reindex --with-descriptions</info>."
+                )
                 self.line(error_string)

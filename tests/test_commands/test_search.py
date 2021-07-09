@@ -6,8 +6,9 @@ from rgov.commands import search
 
 application = Application()
 application.add(search.SearchCommand())
-command = application.find('search')
+command = application.find("search")
 tester = CommandTester(command)
+
 
 def test_lodgepole():
     tester.execute("detroit")
