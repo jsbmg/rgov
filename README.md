@@ -1,18 +1,4 @@
 
-# Table of Contents
-
-1.  [rgov - Recreation.gov Campground Checker](#orgef9b9d8)
-    1.  [Installation](#org9713277)
-    2.  [Quick Start](#org44d7cf0)
-    3.  [Commands](#orgb1d63b5)
-        1.  [Search](#org637d06c)
-        2.  [Check](#org3990b98)
-        3.  [Daemon](#orgaad63e2)
-        4.  [Reindex](#org9b91123)
-    4.  [Todo](#org3da19f3)
-
-
-<a id="orgef9b9d8"></a>
 
 # rgov - Recreation.gov Campground Checker
 
@@ -28,8 +14,6 @@ It is becoming increasingly more difficult to find campsites on Recreation.gov,
 so if you use this tool, please use it with discretion!
 
 
-<a id="org9713277"></a>
-
 ## Installation
 
 Requires: Python 3.6+
@@ -38,8 +22,6 @@ With pip:
 
 $ `pip install rgov`
 
-
-<a id="org44d7cf0"></a>
 
 ## Quick Start
 
@@ -62,12 +44,8 @@ $ `rgov daemon <campground id(s)> --date <...> --length <...> --command <your co
 This will check every five minutes.
 
 
-<a id="orgb1d63b5"></a>
-
 ## Commands
 
-
-<a id="org637d06c"></a>
 
 ### Search
 
@@ -82,8 +60,6 @@ you can search in the campground descriptions like this:
 
 $ `rgov search <search term(s)> --descriptions`
 
-
-<a id="org3990b98"></a>
 
 ### Check
 
@@ -122,8 +98,6 @@ $ `rgov check <campground id(s)> -date <mm-dd-yyyy> -length <nights>`
     </tbody>
     </table>
 
-
-<a id="orgaad63e2"></a>
 
 ### Daemon
 
@@ -171,8 +145,6 @@ $ `rgov daemon <campground id(s)> --date <mm-dd-yyyy> --length <nights> --notifi
     </table>
 
 
-<a id="org9b91123"></a>
-
 ### Reindex
 
 This only needs to be run if you wish to search for campgrounds by description,
@@ -187,8 +159,6 @@ For any reason, you can remove the descriptions with:
 
 $ `rgov reindex`
 
-
-<a id="org3da19f3"></a>
 
 ## Todo
 
