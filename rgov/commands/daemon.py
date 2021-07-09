@@ -89,19 +89,32 @@ option.
 
         with daemon.DaemonContext():
             while True:
+                notify = False
+                notification = [notifier]
+                results = {}
                 for campground_id in campground_ids:
                     try:
                         campground_name, available_sites = self.main(campground_id)
+                        results[campground_name] = len(available_sites)
                     except UnboundLocalError:
                         run([notifier, "Rgov", f"{campground_id} - invalid id!"])
                         continue
-                    if len(available_sites) >= 1:
-                        if self.option("notifier"):
-                            run([notifier, f"{campground_name} - sites found!"])
-                        if self.option("command"):
-                            command = self.option("command")
-                            Popen(command, shell=True)
-                        if self.option("forever"):
+                for campground_name, num_sites in results.items():
+                    if num_sites >= 1:
+                        line = (f"{campground_name} - "
+                                f"{num_sites} site(s) available")
+                        notification.append(line)
+                        notify = True
+                if notify == True:
+                    if self.option("notifier"):
+                        run(notification)
+                    if self.option("command"):
+                        command = self.option("command")
+                        Popen(command, shell=True)
+                    if self.option("forever"):
                             pass
+                    else:
+                        import sys
+                        sys.exit()
 
-                time.sleep(300)
+                time.sleep(300) # 5 minutes until next check
