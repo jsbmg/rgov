@@ -8,10 +8,6 @@ from cleo.helpers import option, argument
 
 from rgov.commands import check_command
 
-# TODO add logging for errors and to show that the daemon is running
-# TODO add to or better the notification method(s) (e.g. signal, email, twitter, phone, etc)
-# TODO show in notifications all campgrounds with availability, not just one or something vague
-
 
 class DaemonCommand(check_command.CheckCommand):
 
