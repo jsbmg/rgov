@@ -99,7 +99,8 @@ option.
                         continue
                 for campground_name, num_sites in results.items():
                     if num_sites >= 1:
-                        line = f"{campground_name} - " f"{num_sites} site(s) available"
+                        line = (f"{campground_name} - "
+                                f"{num_sites} site(s) available")
                         notification.append(line)
                         notify = True
                 if notify == True:
