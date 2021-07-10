@@ -7,8 +7,8 @@ class CheckCommand(check_command.CheckCommand):
 
     name = "check"
     description = "Check a campground for availability"
-
     arguments = [argument("id", "The campground id(s) to check", multiple=True)]
+
     options = [
         option(
             "length",
