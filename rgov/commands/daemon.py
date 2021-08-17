@@ -88,14 +88,16 @@ option.
         with daemon.DaemonContext():
             while True:
                 notify = False
-                notification = [notifier]
+                notification = [notifier, "rgov"]
                 results = {}
                 for campground_id in campground_ids:
                     try:
                         campground_name, available_sites = self.main(campground_id)
                         results[campground_name] = len(available_sites)
                     except UnboundLocalError:
-                        run([notifier, "Rgov", f"{campground_id} - invalid id!"])
+                        run([notifier,
+                             "rgov",
+                             f"{campground_id} - invalid id!"])
                         continue
                 for campground_name, num_sites in results.items():
                     if num_sites >= 1:
