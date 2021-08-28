@@ -18,9 +18,15 @@ so if you use this tool, please use it with discretion!
 
 Requires: Python 3.6+
 
-With pip:
+From pypi:
 
 $ `pip install rgov`
+
+Manually:
+
+$ `git clone https://github.com/jsbmg/rgov`
+$ `cd rgov`
+$ `pip install . pyproject.toml`
 
 
 ## Quick Start
@@ -68,35 +74,33 @@ sites are available, if any.
 
 $ `rgov check <campground id(s)> -date <mm-dd-yyyy> -length <nights>`
 
-1.  Options
-
-    <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
-    <colgroup>
-    <col  class="org-left" />
+<colgroup>
+<col  class="org-left" />
 
-    <col  class="org-left" />
-    </colgroup>
-    <tbody>
-    <tr>
-    <td class="org-left"><code>--date[-d]</code></td>
-    <td class="org-left">The date to check (mm-dd-yyyy)</td>
-    </tr>
-
-
-    <tr>
-    <td class="org-left"><code>--length[-l]</code></td>
-    <td class="org-left">The number of days you'll be staying</td>
-    </tr>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><code>--date[-d]</code></td>
+<td class="org-left">The date to check (mm-dd-yyyy)</td>
+</tr>
 
 
-    <tr>
-    <td class="org-left"><code>--url[-u]</code></td>
-    <td class="org-left">Show the url of campground</td>
-    </tr>
-    </tbody>
-    </table>
+<tr>
+<td class="org-left"><code>--length[-l]</code></td>
+<td class="org-left">The number of days you'll be staying</td>
+</tr>
+
+
+<tr>
+<td class="org-left"><code>--url[-u]</code></td>
+<td class="org-left">Show the url of campground</td>
+</tr>
+</tbody>
+</table>
 
 
 ### Daemon
@@ -108,44 +112,42 @@ shell command.
 
 $ `rgov daemon <campground id(s)> --date <mm-dd-yyyy> --length <nights> --notifier <notification program> --command <shell command>`
 
-1.  Options
-
-    <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
-    <colgroup>
-    <col  class="org-left" />
+<colgroup>
+<col  class="org-left" />
 
-    <col  class="org-left" />
-    </colgroup>
-    <tbody>
-    <tr>
-    <td class="org-left"><code>--date[-d]</code></td>
-    <td class="org-left">The date to check (mm-dd-yyyy)</td>
-    </tr>
-
-
-    <tr>
-    <td class="org-left"><code>--length[-l]</code></td>
-    <td class="org-left">The number of days you'll be staying</td>
-    </tr>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><code>--date[-d]</code></td>
+<td class="org-left">The date to check (mm-dd-yyyy)</td>
+</tr>
 
 
-    <tr>
-    <td class="org-left"><code>--notifier[-n]</code></td>
-    <td class="org-left">Specify a notification program to use (e.g. herbe)</td>
-    </tr>
+<tr>
+<td class="org-left"><code>--length[-l]</code></td>
+<td class="org-left">The number of days you'll be staying</td>
+</tr>
 
 
-    <tr>
-    <td class="org-left"><code>--command[-c]</code></td>
-    <td class="org-left">The shell command to run if site(s) are found</td>
-    </tr>
-    </tbody>
-    </table>
+<tr>
+<td class="org-left"><code>--notifier[-n]</code></td>
+<td class="org-left">Specify a notification program to use (e.g. herbe)</td>
+</tr>
 
 
-### Reindex
+<tr>
+<td class="org-left"><code>--command[-c]</code></td>
+<td class="org-left">The shell command to run if site(s) are found</td>
+</tr>
+</tbody>
+</table>
+
+
+## Reindex
 
 This only needs to be run if you wish to search for campgrounds by description,
 which is useful for finding campground by city, region, or park name. It will
@@ -160,8 +162,9 @@ For any reason, you can remove the descriptions with:
 $ `rgov reindex`
 
 
-## Todo
+# Todo
 
 [ ] Add additional ways for notifications to be sent (e.g. phone/email)
 
 [ ] Write more testing
+
