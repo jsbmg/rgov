@@ -17,11 +17,17 @@ so if you use this tool, please use it with discretion!
 
 Requires: Python 3.6+
 
-With pip:
+From pypi:
 
 $ =pip install rgov=
 
-** Quick Start
+Manually:
+
+$ =git clone https://github.com/jsbmg/rgov=
+$ =cd rgov=
+$ =pip install . pyproject.toml=
+
+*** Quick Start
 
 First, find your campgrounds id (usually a six-digit number):
 
