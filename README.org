@@ -13,7 +13,7 @@ availability automatically.
 It is becoming increasingly more difficult to find campsites on Recreation.gov,
 so if you use this tool, please use it with discretion!
 
-** Installation
+*** Installation
 
 Requires: Python 3.6+
 
@@ -47,8 +47,8 @@ $ =rgov daemon <campground id(s)> --date <...> --length <...> --command <your co
 
 This will check every five minutes.
 
-** Commands
-*** Search
+*** Commands
+**** Search
 
 Search for campground ids for user with the =check= and =daemon= commands:
 
@@ -61,20 +61,18 @@ you can search in the campground descriptions like this:
 
 $ =rgov search <search term(s)> --descriptions=
 
-*** Check
+**** Check
 
 The check command quickly searches campgrouns for availability and prints which
 sites are available, if any.
 
 $ =rgov check <campground id(s)> -date <mm-dd-yyyy> -length <nights>=
 
-**** Options
-
 | =--date[-d]=   | The date to check (mm-dd-yyyy)       |
 | =--length[-l]= | The number of days you'll be staying |
 | =--url[-u]=    | Show the url of campground           |
 
-*** Daemon
+**** Daemon
 
 Similiar to the =check= command, the =daemon= command starts a daemon that
 checks for availability every five minutes in the background. The method of
@@ -82,8 +80,6 @@ notification is up to you, and can either be a notification program or custom
 shell command.
 
 $ =rgov daemon <campground id(s)> --date <mm-dd-yyyy> --length <nights> --notifier <notification program> --command <shell command>=
-
-**** Options
 
 | =--date[-d]=     | The date to check (mm-dd-yyyy)                     |
 | =--length[-l]=   | The number of days you'll be staying               |
