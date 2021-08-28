@@ -25,7 +25,9 @@ $ `pip install rgov`
 Manually:
 
 $ `git clone https://github.com/jsbmg/rgov`
+
 $ `cd rgov`
+
 $ `pip install . pyproject.toml`
 
 
