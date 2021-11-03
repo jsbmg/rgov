@@ -2,7 +2,7 @@
 name = "rgov"
 version = "0.2.3"
 description = "Check if campsites are available on Recreation.gov"
-authors = ["Jordan Sweet <hello@jordandsweet.com>"]
+authors = ["Jordan Sweet <jsbmgcontact@protonmail.com>"]
 license = "GPL-3.0-only"
 readme = "README.md"
 
