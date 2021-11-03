@@ -54,7 +54,7 @@ url along with the results for quickly navigating to the reservation web page.
             except UnboundLocalError:
                 invalid_id_line = (
                     f"<fg=red> \u2022 <info>{campground_id}</info> "
-                    f"is not a valid campground id</fg=red>"
+                    f"is not a valid campground id.</fg=red>"
                 )
                 self.line(invalid_id_line)
                 continue
@@ -68,7 +68,7 @@ url along with the results for quickly navigating to the reservation web page.
             elif num_sites > 12:
                 result_string = f"{num_sites} sites available"
             else:
-                result_string = "<fg=yellow>No sites available</fg=yellow>"
+                result_string = "<fg=yellow>No sites available.</fg=yellow>"
 
             result_line = (
                 f"<question> \u2022 {campground_name}</question> - "
