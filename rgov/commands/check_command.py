@@ -1,7 +1,9 @@
 import csv
 import datetime
 import json
-import requests
+
+from urllib.request import Request, urlopen
+from urllib.parse import urlencode
 
 from cleo import Command
 from fake_useragent import UserAgent
@@ -12,7 +14,6 @@ from rgov.commands import paths
 class CheckCommand(Command):
 
     base_url = "https://www.recreation.gov/api/camps/availability/campground/"
-    headers = {"User-Agent": UserAgent().random}
     human_time_format = "%m/%d/%y"
     request_time_format = "%Y-%m-%dT00:00:00.000Z"
     response_time_format = "%Y-%m-%dT00:00:00Z"
@@ -88,8 +89,16 @@ class CheckCommand(Command):
         url = f"{self.base_url}{campground_id}/month?"
         responses = []
         for date in request_dates:
-            data = requests.get(url, {"start_date": date}, headers=self.headers)
-            data_loaded = json.loads(data.text)
+            params = {
+                "start_date": date
+                }
+            query_string = urlencode(params)
+            url = url + query_string
+            req = Request(url)
+            req.add_header("User-Agent", UserAgent().random)
+            data = urlopen(req)
+            data = data.read()
+            data_loaded = json.loads(data)
             try:
                 campsite_data = data_loaded["campsites"]
             except KeyError as e:
