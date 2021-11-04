@@ -59,9 +59,8 @@ url along with the results for quickly navigating to the reservation web page.
                 self.line(invalid_id_line)
                 continue
 
-            num_sites = len(available_sites)
-
             # if id is valid
+            num_sites = len(available_sites)
             if 1 <= num_sites <= 12:
                 sitelist_sorted = sorted(available_sites)
                 result_string = " ".join(sitelist_sorted)
