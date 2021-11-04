@@ -77,10 +77,10 @@ the descriptions included.
                 cleantext = re.sub(cleanr, "", raw_html)
                 return cleantext
 
-        with open(paths.facilities_csv_path, "r") as i:
-            reader = csv.reader(i)
-            with open(paths.index_path, "w") as o:
-                writer = csv.writer(o)
+        with open(paths.facilities_csv_path, "r") as in_file:
+            reader = csv.reader(in_file)
+            with open(paths.index_path, "w") as out_file:
+                writer = csv.writer(out_file)
                 for row in reader:
                     # filter for reservable campgrounds with a non-empty name entry
                     if row[7] == "Campground" and row[19] == "true" and row[5]:
