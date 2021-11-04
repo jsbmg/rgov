@@ -74,12 +74,12 @@ url along with the results for quickly navigating to the reservation web page.
                 f"<question> \u2022 {campground_name}</question> - "
                 f"<fg=cyan>{result_string}</fg=cyan>"
             )
-            url_line = (
-                f"<fg=green>   "
-                "https://www.recreation.gov/camping/campgrounds/"
-                f"{campground_id}/availability</fg=green>"
-            )
 
             self.line(result_line)
             if self.option("url"):
+                url_line = (
+                    f"<fg=green>   "
+                    "https://www.recreation.gov/camping/campgrounds/"
+                    f"{campground_id}/availability</fg=green>"
+                )
                 self.line(url_line)
