@@ -43,11 +43,12 @@ class CheckCommand(Command):
                 arrival_date = datetime.datetime.strptime(date_input, "%m-%d-%Y")
             except ValueError:
                 date_error_line = (
-                    f'"{date_input}" is not a valid date' " in the form mm-dd-yyyy"
+                    f'"{date_input}" is not a valid date in the form mm-dd-yyyy'
                 )
                 raise ValueError(date_error_line)
         else:
             arrival_date = datetime.date.today()
+            
         if self.option("length"):
             length_input = self.option("length")
             try:
