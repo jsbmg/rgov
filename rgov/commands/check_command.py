@@ -87,9 +87,9 @@ class CheckCommand(Command):
         # above, and stores each response in a list. If the response is empty
         # it may be an invalid id, so the function will return with
         # "INVALID_ID".
-        url = f"{self.base_url}{campground_id}/month?"
         responses = []
         for date in request_dates:
+            url = f"{self.base_url}{campground_id}/month?"
             params = {
                 "start_date": date
                 }
