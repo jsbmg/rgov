@@ -1,3 +1,5 @@
+import sys
+
 from cleo import Application
 
 from rgov.commands import check, search, reindex, check_daemon
@@ -13,10 +15,8 @@ application = Application()
 
 [application.add(command) for command in commands]
 
-
-def main() -> int:
-    return application.run()
-
+def main():
+    application.run()
 
 if __name__ == "__main__":
-    run()
+    main()
