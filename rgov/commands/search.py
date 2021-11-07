@@ -3,7 +3,7 @@ import csv
 from cleo import Command
 from cleo.helpers import option, argument
 
-from rgov.commands import paths
+from rgov.utils import constants
 
 
 class SearchCommand(Command):
@@ -32,17 +32,16 @@ this options requires that the search index be rebuilt (see the
         search_terms = self.argument("terms")
         search_terms_lowercase = [term.lower() for term in search_terms]
         num_search_terms = len(search_terms)
-
-        # Read the index csv file line by line. If a match is found, the
-        # corresponding name and id is printed. If multiple search words, all
-        # must match the search string, in any order. The target_column
-        # variable specifies which column to search in. Column 1 is names, and
-        # column 2 contains the descriptions.
+        
         if self.option("descriptions"):
-            target_column = 2  # the search target column
+            # target_column determines which column of the csv is
+            # searched. '2' is the campsite descriptions and '1' is the
+            # campsite names.
+            target_column = 2 
         else:
             target_column = 1
-        with open(paths.index_path, "r") as i:
+            
+        with open(constants.index_path, "r") as i:
             reader = csv.reader(i)
             try:
                 for row in reader:
@@ -55,13 +54,15 @@ this options requires that the search index be rebuilt (see the
                                     f"<question>{row[1].title()}</question>"
                                     f" - <info>{row[0]}</info>"
                                 )
-
-            # This error occurs when description option is passed but the csv
-            # isn't built with the descriptions included.
+            
             except IndexError:
-                error_string = (
+                # Alert that this error is happening because the
+                # descriptions aren't included in the database. They can
+                # be included via the --with-descriptions option in the
+                # reindex command.
+                error_text = (
                     "<fg=red>Description searches "
                     "are disabled.</fg=red>\nEnable with "
                     "<info>rgov reindex --with-descriptions</info>."
                 )
-                self.line(error_string)
+                self.line(error_text)
