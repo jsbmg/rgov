@@ -3,3 +3,5 @@ __pycache__
 /dist/*
 poetry.lock
 /rgov/data/*
+rgov.egg-info/*
+setup.py
