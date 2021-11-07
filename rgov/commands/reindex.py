@@ -1,6 +1,7 @@
 import csv
 import os
 import urllib.request
+import re
 import shutil
 import zipfile
 
@@ -9,6 +10,10 @@ from cleo.helpers import option
 
 from rgov.utils import constants
 
+def cleanhtml(raw_html):
+    cleanr = re.compile("<.*?>")
+    cleantext = re.sub(cleanr, "", raw_html)
+    return cleantext
 
 
 class UpdateIndexCommand(Command):
