@@ -38,6 +38,3 @@ def notify(key, device, url, message):
     request = Request(url, urlencode(post_fields).encode())
     status = json.loads(urlopen(request).read().decode())
     return status['status']
-
-    
-
