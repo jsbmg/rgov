@@ -1,12 +1,12 @@
 from cleo import Application
 
-from rgov.commands import check, search, reindex, daemon
+from rgov.commands import check, search, reindex, check_daemon
 
 commands = [
     check.CheckCommand(),
     search.SearchCommand(),
     reindex.UpdateIndexCommand(),
-    daemon.DaemonCommand(),
+    check_daemon.DaemonCommand(),
 ]
 
 application = Application()
