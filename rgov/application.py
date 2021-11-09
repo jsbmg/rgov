@@ -2,13 +2,13 @@ import sys
 
 from cleo import Application
 
-from rgov.commands import check, search, reindex, check_daemon
+from rgov.commands import check, search, initialize, check_daemon, run
 
 commands = [
     check.CheckCommand(),
     search.SearchCommand(),
-    reindex.UpdateIndexCommand(),
     initialize.InitCommand(),
+    run.RunCommand(),
     check_daemon.DaemonCommand(),
 ]
 
