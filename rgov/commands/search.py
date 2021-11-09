@@ -1,9 +1,7 @@
-import csv
-
 from cleo import Command
 from cleo.helpers import option, argument
 
-from rgov.utils import constants
+from rgov.utils import search_command
 
 
 class SearchCommand(Command):
@@ -13,6 +11,7 @@ class SearchCommand(Command):
     arguments = [argument("terms", "The terms to search for", multiple=True)]
     options = [
         option("descriptions", "d", "Search descriptions"),
+        option("interactive", "i", "Interact with the search results")
     ]
 
     help = """The <info>search</info> command searches text to find campground
@@ -26,12 +25,10 @@ this options requires that the search index be rebuilt (see the
 
 <info>rgov reindex --with-descriptions</info>.
 """
-
+    
     def handle(self):
         """Search campground names and descriptions and print their name and id."""
         search_terms = self.argument("terms")
-        search_terms_lowercase = [term.lower() for term in search_terms]
-        num_search_terms = len(search_terms)
         
         if self.option("descriptions"):
             # target_column determines which column of the csv is
@@ -41,28 +38,6 @@ this options requires that the search index be rebuilt (see the
         else:
             target_column = 1
             
-        with open(constants.index_path, "r") as i:
-            reader = csv.reader(i)
-            try:
-                for row in reader:
-                    count = 0
-                    for term in search_terms_lowercase:
-                        if term in row[target_column]:
-                            count += 1
-                            if count == num_search_terms:
-                                self.line(
-                                    f"<question>{row[1].title()}</question>"
-                                    f" - <info>{row[0]}</info>"
-                                )
-            
-            except IndexError:
-                # Alert that this error is happening because the
-                # descriptions aren't included in the database. They can
-                # be included via the --with-descriptions option in the
-                # reindex command.
-                error_text = (
-                    "<fg=red>Description searches "
-                    "are disabled.</fg=red>\nEnable with "
-                    "<info>rgov reindex --with-descriptions</info>."
-                )
-                self.line(error_text)
+        search_results = search_command.search(search_terms, target_column)
+        for key, value in search_results:
+            self.line(f"<question>{key}</> - <info>{value}</>")

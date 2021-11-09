@@ -1,5 +1,6 @@
 import datetime
 import getpass
+import logging
 import time
 
 import daemon
@@ -8,6 +9,7 @@ from cleo import Command
 from cleo.helpers import option, argument
 
 from rgov.utils import check_command, pushsafer
+
 
 class DaemonCommand(Command):
 
@@ -60,28 +62,23 @@ option.
             value_required=True,
         ),
         option(
-            "notifier",
+            "notify-limit",
             "N",
-            "The notifier to run if an availability is found [notify-send]",
+            "The number of notifications to send before the program exits [3]",
             flag=False,
             value_required=True,
         ),
         option(
             "command",
             "c",
-            "The command to run if an availability is found",
+            "Command to run if availability found",
             flag=False,
             value_required=True,
         ),
     ]
 
-    def handle(self):
+    def handle(self) -> int:
         campground_ids = self.argument("id")
-
-        if self.option("notifier"):
-            notifier = self.option("notifier")
-        else:
-            notifier = "notify-send"
 
         if self.option("date"):
             date_input = self.option("date")
@@ -94,48 +91,75 @@ option.
             length_of_stay = check_command.parse_length_of_stay(length_input)
         else:
             length_of_stay = 3
-
+            
+        if self.option("notify-limit"):
+            notify_limit = self.option("notify-limit")
+        else:
+            notify_limit = 3
+            
         request_dates = check_command.get_request_dates(arrival_date, length_of_stay)
         stay_dates = check_command.get_stay_dates(arrival_date, length_of_stay)
 
-        # make sure the api key works before proceeding
-        key_test = 0
-        while key_test == 0:
+        # make sure the api key works
+        authenticated = False
+        while authenticated == False:
             ps_username, ps_api_key = pushsafer.input_credentials()
-            key_test = pushsafer.validate_key(ps_username, ps_api_key)
-            if key_test == 0:
+            authenticated = pushsafer.validate_key(ps_username, ps_api_key)
+            if authenticated == False:
                 self.line("Invalid credentials.")
-                
+
         self.line("<fg=magenta>Daemon started.</fg=magenta>")
         
         with daemon.DaemonContext():
+            logging.basicConfig(filename='/home/user/rgov.log',
+                                filemode='a',
+                                format='[%(asctime)s] %(message)s',
+                                datefmt='%Y/%d/%m %H:%M:%S',
+                                level=logging.INFO)
+            logging.info('starting to search')
+            
+            notifications_sent = 0
+            
             while True:
+                logging.info('------------checking------------')
                 campgrounds = {}
+                found_available = False
                 for campground_id in campground_ids:
                     campground_name = check_command.get_campground_name(campground_id)
-                    data = check_command.request(request_dates, campground_id)
+                    try:
+                        data = check_command.request(request_dates, campground_id)
+                    except HTTPError as e:
+                        logging.error(e)
+                        time.sleep(10)
+                        continue
+                        
                     available_sites = check_command.get_available_sites(data, stay_dates)
-                    if available_sites:
-                        campgrounds[campground_name] = available_sites
-
-                notification = ""
-                if campgrounds:
-                    for campground, sites in campgrounds.items():
-                        url = check_command.generate_campground_url(campground_id)
-                        num_sites_available = len(sites)
-                        if 1 <= num_sites_available <= 12:
-                            sorted_sites = ", ".join(sorted(available_sites))
-                            text_output = (f"· {campground_name}: "
-                                           f"site(s) {sorted_sites} available!")
-                            notification += text_output + "\n"
-                        elif num_sites_available > 12:
-                            text_output = (f"· {campground_name}: "
-                                           f"{num_sites_available} sites available!")
-                            notification += text_output + "\n"
-                            
-                    pushsafer.notify(ps_api_key, 'a', url, notification)
                     
-                    if not self.option("forever"):
-                        return 0
+                    if available_sites:
+                        logging.info(f'{campground_name} - found available site(s)')
+                        campgrounds[campground_name] = available_sites
+                        found_available = True
+                    else:
+                        logging.info(f'{campground_name} - no available site(s)')
+
+                    if campground_id != campground_ids[-1]:
+                        time.sleep(1)
+
+                if found_available:
+                    message = pushsafer.gen_notifier_text(campgrounds)
+                    pushsafer_status = pushsafer.notify(ps_api_key, 'a', message)
+                    if pushsafer_status['status'] == 0:
+                        logging.error(f"Pushsafer: {pushsafer_status}")
+                    else:
+                        logging.info(f"Pushsafer: {pushsafer_status}")
+                    notifications_sent += 1
+                    
+                if notifications_sent == notify_limit:
+                    reached_notify_limit = ("notification limit reached "
+                                            f"[{num_anotifications}] - exiting")
+                    logging.info(reached_notify_limit)
+                    return 0
                                            
                 time.sleep(300)  # wait 5 minutes before rechecking
+
+

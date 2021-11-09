@@ -1,9 +1,10 @@
 import datetime
+import time
 
 from cleo import Command
 from cleo.helpers import argument, option
 
-from rgov.utils import constants, check_command
+from rgov.utils import constants, check_command, pushsafer
 
 
 class CheckCommand(Command):
@@ -28,6 +29,7 @@ class CheckCommand(Command):
             flag=False,
             value_required=True,
         ),
+        option("chron-mode", "c", "Run once and notifiy if sites available"),
     ]
 
 
@@ -45,7 +47,7 @@ campgrounds, separate the campground ids with spaces:
 Unless otherwise specified, the command checks for the current date and a
 length of stay of three days. The <comment>--url</comment> option prints the
 url along with the results for quickly navigating to the reservation web page.
- 
+
 """
     
     def handle(self) ->int:
@@ -66,24 +68,34 @@ url along with the results for quickly navigating to the reservation web page.
         request_dates = check_command.get_request_dates(arrival_date, length_of_stay)
         stay_dates = check_command.get_stay_dates(arrival_date, length_of_stay)
 
+        campground_results = {}
         for campground_id in campground_ids:
             campground_name = check_command.get_campground_name(campground_id)
-            data = check_command.request(request_dates, campground_id)
-            available_sites = check_command.get_available_sites(data, stay_dates)
-            num_sites_available = len(available_sites)
             
-            if 1 <= num_sites_available <= 12:
-                sorted_sites = ", ".join(sorted(available_sites))
-                text_output = f"{campground_name}: site(s) {sorted_sites} available!"
-            elif num_sites_available > 12:
-                text_output = f"{campground_name}: {num_sites_available} sites available!"
+            try:
+                data = check_command.request(request_dates, campground_id)
+            except Exception as e:
+                print(e)
+                continue
+            
+            available_sites = check_command.get_available_sites(data, stay_dates)
+            
+            if self.option("chron-mode"):
+                campground_results[campground_name] = available_sites
             else:
-                text_output = f"{campground_name}: No sites available."
+                text_output = check_command.generate_cli_output(campground_name,
+                                                                 available_sites)
+                self.line(text_output)
                 
-            if self.option("url"):
-                url = check_command.generate_campground_url(campground_id)
-                text_output += "\n" + url
+            if campground_id != campground_ids[-1]:
+                time.sleep(1)
+
+        if self.option("chron-mode"):
+            message = pushsafer.gen_message(campground_results)
+            if message:
+                print("Pushsafer: ", message)
                 
-            self.line(text_output)
+                # TODO get api key without prompting
+                # pushsafer.notify(key, 'a', message)
                 
-        return 0
+        return 0       

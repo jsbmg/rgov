@@ -53,18 +53,21 @@ def request(request_dates, campground_id):
         url = url + query_string
         req = Request(url)
         req.add_header("User-Agent", UserAgent().random)
-        data = urlopen(req)
+        try:
+            data = urlopen(req)
+        except HTTPError:
+            raise
         data = data.read()
         data_loaded = json.loads(data)
         try:
             campsite_data = data_loaded["campsites"]
         except KeyError as e:
-            raise UnboundLocalError("Invalid ID")
+            raise
         requests.append(campsite_data.values())
     return requests
     
 def get_available_sites(requests, stay_dates):
-    unavailable_sites = []
+    available_sites = []
     last_day = stay_dates[-1]
     for request in requests:
         for site in request:
@@ -74,9 +77,8 @@ def get_available_sites(requests, stay_dates):
                         break
                     else:
                         if date == last_day:
-                            unavailable_sites.append(site["site"])
-    return unavailable_sites
- 
+                            available_sites.append(site["site"])
+    return sorted(available_sites)
          
 def parse_arrival_date(date_input):
     try:
@@ -98,4 +100,29 @@ def parse_length_of_stay(length_input):
 
 def generate_campground_url(campground_id):
     return constants.browser_base_url + campground_id + "/availability"
+
+def check(campground_id, request_dates, stay_dates):
+    campground_name = get_campground_name(campground_id)
+    try:
+        data = request(request_dates, campground_id)
+    except Exception as e:
+        raise e
     
+    available_sites = get_available_sites(data, stay_dates)
+    return campground_name, available_sites
+
+def generate_cli_output(campground_name, available_sites):
+    num_sites_available = len(available_sites)
+    if 1 <= num_sites_available <= 12:
+        sorted_sites = ", ".join(sorted(available_sites))
+        text_output = (f"<question>{campground_name}</question> - "
+        f"<info>site(s) {sorted_sites} available</info>.")
+    elif num_sites_available > 12:
+        text_output = (f"<question>{campground_name}</question> - "
+        f"<info>{num_sites_available} sites available</info>.")
+    else:
+        text_output = (f"<question>{campground_name}</question> - "
+        f"<fg=yellow>No sites available</fg=yellow>.")
+    return text_output
+    
+
