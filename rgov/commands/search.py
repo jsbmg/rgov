@@ -1,7 +1,7 @@
 from cleo import Command
 from cleo.helpers import option, argument
 
-from rgov.utils import search_command
+from rgov.utils import search_command as s_c
 
 
 class SearchCommand(Command):
@@ -38,6 +38,6 @@ this options requires that the search index be rebuilt (see the
         else:
             target_column = 1
             
-        search_results = search_command.search(search_terms, target_column)
-        for key, value in search_results:
-            self.line(f"<question>{key}</> - <info>{value}</>")
+        search_results = s_c.search(search_terms, target_column)
+        for name, name_id in search_results:
+            self.line(f"<question>{name}</> - <info>{name_id}</>")

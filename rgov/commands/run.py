@@ -5,8 +5,8 @@ import time
 from cleo import Command
 from cleo.helpers import option, argument
 
-from rgov.utils import constants, search_command, check_command
-
+from rgov.utils import search_command as s_c
+from rgov.utils import check_command as c_c
 
 class RunCommand(Command):
 
@@ -39,7 +39,7 @@ class RunCommand(Command):
             else:
                 target_column = 1
                 
-            additional_results = search_command.search(query_list, target_column)
+            additional_results = s_c.search(query_list, target_column)
             additional_results = {k: v for k, v in additional_results}
             search_results.update(additional_results)
             new_names = [name for name in additional_results.keys()]
@@ -102,24 +102,24 @@ class RunCommand(Command):
         self.line("")
 
         arrival_date = f"{month}-{day}-{year}"
-        arrival_date_parsed = check_command.parse_arrival_date(arrival_date)
-        request_dates = check_command.get_request_dates(arrival_date_parsed,
+        arrival_date_parsed = c_c.parse_arrival_date(arrival_date)
+        request_dates = c_c.get_request_dates(arrival_date_parsed,
                                                         length_of_stay)
-        stay_dates = check_command.get_stay_dates(arrival_date_parsed, length_of_stay)
+        stay_dates = c_c.get_stay_dates(arrival_date_parsed, length_of_stay)
 
         self.line("<fg=green>Checking</>:")
         unavailable = []
         for campground_id in ids:
             try:
-                campground_name, available_sites = check_command.check(campground_id,
-                                                                       request_dates,
-                                                                       stay_dates)
+                campground_name, available_sites = c_c.check(campground_id,
+                                                             request_dates,
+                                                             stay_dates)
             except Exception as e:
                 self.line(e)
                 time.sleep(2)
                 continue
 
-            text_output = check_command.generate_cli_output(campground_name,
+            text_output = c_c.generate_cli_output(campground_name,
                                                              available_sites)
             self.line(text_output)
             

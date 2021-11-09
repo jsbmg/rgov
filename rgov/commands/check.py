@@ -4,7 +4,8 @@ import time
 from cleo import Command
 from cleo.helpers import argument, option
 
-from rgov.utils import constants, check_command, pushsafer
+from rgov.utils import pushsafer
+from rgov.utils import check_command as c_c
 
 
 class CheckCommand(Command):
@@ -55,36 +56,36 @@ url along with the results for quickly navigating to the reservation web page.
         
         if self.option("date"):
             date_input = self.option("date")
-            arrival_date = check_command.parse_arrival_date(date_input)
+            arrival_date = c_c.parse_arrival_date(date_input)
         else:
             arrival_date = datetime.date.today()
             
         if self.option("length"):
             length_input = self.option("length")
-            length_of_stay = check_command.parse_length_of_stay(length_input)
+            length_of_stay = c_c.parse_length_of_stay(length_input)
         else:
             length_of_stay = 3
 
-        request_dates = check_command.get_request_dates(arrival_date, length_of_stay)
-        stay_dates = check_command.get_stay_dates(arrival_date, length_of_stay)
+        request_dates = c_c.get_request_dates(arrival_date, length_of_stay)
+        stay_dates = c_c.get_stay_dates(arrival_date, length_of_stay)
 
         campground_results = {}
         for campground_id in campground_ids:
-            campground_name = check_command.get_campground_name(campground_id)
+            campground_name = c_c.get_campground_name(campground_id)
             
             try:
-                data = check_command.request(request_dates, campground_id)
+                data = c_c.request(request_dates, campground_id)
             except Exception as e:
                 print(e)
                 continue
             
-            available_sites = check_command.get_available_sites(data, stay_dates)
+            available_sites = c_c.get_available_sites(data, stay_dates)
             
             if self.option("chron-mode"):
                 campground_results[campground_name] = available_sites
             else:
-                text_output = check_command.generate_cli_output(campground_name,
-                                                                 available_sites)
+                text_output = c_c.generate_cli_output(campground_name,
+                                                      available_sites)
                 self.line(text_output)
                 
             if campground_id != campground_ids[-1]:
