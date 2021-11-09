@@ -16,12 +16,12 @@ def cleanhtml(raw_html):
     return cleantext
 
 
-class UpdateIndexCommand(Command):
+class InitCommand(Command):
 
-    name = "reindex"
+    name = "init"
     description = "Update the campground id search index"
 
-    help = """The <info>reindex</info> command downloads facility data from
+    help = """The <info>init</info> command downloads facility data from
 recreation.gov and builds a searchable database from that.
 
 By default, the database is built with campground names and ids. The<comment>
@@ -108,7 +108,7 @@ the descriptions included.
         ]
 
         if not self.confirm(
-            "Are you sure you want to regenerate the campsite id index?", False
+            "Continue with downloading and generating the campsite id index?", False
         ):
             return
 
@@ -120,6 +120,6 @@ the descriptions included.
                 step[1](descriptions)  # needs argument
             else:
                 step[1]()
-            self.overwrite(format + f"<comment>done</comment>")
+            self.overwrite(format + f"<comment>done</comment>.")
 
         self.line("")

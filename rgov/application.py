@@ -8,6 +8,7 @@ commands = [
     check.CheckCommand(),
     search.SearchCommand(),
     reindex.UpdateIndexCommand(),
+    initialize.InitCommand(),
     check_daemon.DaemonCommand(),
 ]
 
