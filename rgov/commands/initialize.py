@@ -8,9 +8,9 @@ import zipfile
 from cleo import Command
 from cleo.helpers import option
 
-from rgov.utils import constants
+from rgov.utils.constants import Paths, Urls
 
-def cleanhtml(raw_html):
+def cleanhtml(raw_html) -> str:
     cleanr = re.compile("<.*?>")
     cleantext = re.sub(cleanr, "", raw_html)
     return cleantext
@@ -41,14 +41,14 @@ the descriptions included.
     ]
 
     def ensure_download_dir_exists(self):
-        os.makedirs(constants.download_folder, exist_ok=True)
+        os.makedirs(Paths.download_folder, exist_ok=True)
 
     def request_ridb_data(self):
-        urllib.request.urlretrieve(constants.download_url, constants.download_path)
+        urllib.request.urlretrieve(Urls.download_url, Paths.download_path)
 
     def unzip_ridb_data(self):
-        with zipfile.ZipFile(constants.download_path, "r") as zip_ref:
-            zip_ref.extractall(constants.download_folder)
+        with zipfile.ZipFile(Paths.download_path, "r") as zip_ref:
+            zip_ref.extractall(Paths.download_folder)
 
     def generate_index(self, descriptions):
         """
@@ -73,11 +73,11 @@ the descriptions included.
         Column 1 = Facility Name
         Column 2 = Facility Description (if --with-descriptions)
         """
-        os.makedirs(constants.data_folder, exist_ok=True)
+        os.makedirs(Paths.data_folder, exist_ok=True)
 
-        with open(constants.facilities_csv_path, "r") as in_file:
+        with open(Paths.facilities_csv_path, "r") as in_file:
             reader = csv.reader(in_file)
-            with open(constants.index_path, "w") as out_file:
+            with open(Paths.index_path, "w") as out_file:
                 writer = csv.writer(out_file)
                 for row in reader:
                     # filter for reservable campgrounds with a non-empty name entry
@@ -94,14 +94,14 @@ the descriptions included.
         Removes the project-local downlaod folder
         and its contents.
         """
-        shutil.rmtree(constants.download_folder)
+        shutil.rmtree(Paths.download_folder)
 
     def handle(self):
         descriptions = self.option("with-descriptions")
 
         steps = [
             ("Ensuring download directory exists", self.ensure_download_dir_exists),
-            (f"Downloading data from {constants.download_url}", self.request_ridb_data),
+            (f"Downloading data from {Urls.download_url}", self.request_ridb_data),
             ("Unzipping", self.unzip_ridb_data),
             ("Generating index", self.generate_index),
             ("Deleting temporary files", self.delete_temp_files),

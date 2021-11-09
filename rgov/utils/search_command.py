@@ -2,7 +2,7 @@ import csv
 
 from typing import Generator
 
-from rgov.utils import constants
+from rgov.utils.constants import Paths
 
 
 def search(search_terms: str, target_column: int) -> Generator[tuple[str, str], None, None]:
@@ -11,7 +11,7 @@ def search(search_terms: str, target_column: int) -> Generator[tuple[str, str], 
     
     search_results = {}
     try:
-        with open(constants.index_path, "r") as i:
+        with open(Paths.index_path, "r") as i:
             reader = csv.reader(i)
             try:
                 for row in reader:

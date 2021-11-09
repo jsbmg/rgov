@@ -9,7 +9,7 @@ from cleo import Command
 from cleo.helpers import option, argument
 
 from rgov.utils import check_command, pushsafer
-
+from rgov.utils.constants import Paths
 
 class DaemonCommand(Command):
 
@@ -111,7 +111,7 @@ option.
         self.line("<fg=magenta>Daemon started.</fg=magenta>")
         
         with daemon.DaemonContext():
-            logging.basicConfig(filename='/home/user/rgov.log',
+            logging.basicConfig(filename=Paths.log_file,
                                 filemode='a',
                                 format='[%(asctime)s] %(message)s',
                                 datefmt='%Y/%d/%m %H:%M:%S',
