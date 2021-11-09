@@ -4,14 +4,11 @@
 
 [[http://www.gnu.org/licenses/gpl-3.0][https://img.shields.io/badge/License-GPL%20v3-blue.svg]]
 
-=rgov= is a command line program to check for campground availability on
-Recreation.gov. While other recreation.gov scrapers exist, this one aims to
-also provide a simple search command for quickly finding the campsite ids that
-are necessary for checking campgrounds. It also includes a daemon to check for
-availability automatically.
-
-It is becoming increasingly more difficult to find campsites on Recreation.gov,
-so if you use this tool, please use it with discretion!
+=rgov= is a program to check for available campsites on
+Recreation.gov. It can be used in the terminal, or as a background
+daemon, relying on Pushsafer to send a notification to your phone or
+other device when a campsite at your desired camground becomes
+available.
 
 *** Installation
 
@@ -29,81 +26,43 @@ $ =cd rgov=
 
 $ =pip install . pyproject.toml=
 
+**** Setting up Pushsafer
+
+Rgov uses the Pushsafer API to send push notifications to your device in
+the event a campground becomes available. You will need to create an
+account, register your device, and save the API key if you want to run
+the program as a daemon.
+
 *** Quick Start
 
-First, find your campgrounds id (usually a six-digit number):
+After installation, initialize with:
 
-$ =rgov search <campground>=
+$ =rgov reindex [--with-descriptions]=
+
+Optionally, include the --with-descriptions. This downloads a database
+from Recreation.gov containing a database of facilities, which we will
+use to lookup campgrounds.
+
+Once that's done, you can use the search command to find your
+campground's id (a six-digit number), which we will need to check it for
+availability:
+
+$ =rgov search [--descriptions] <campground>=
 
 You can also find the id in the url of the campgound's page on Recreation.gov.
 
-To check if there are available sites (separate multiple ids with spaces):
+Once you have the idea, you can check the campground for available sites:
 
 $ =rgov check <campground id(s)> --date <mm-dd-yyyy> --length <number of nights>=
 
-If there aren't, you can run automated checks. Start the daemon with your
-preferred method of notification (either a notification program or your own
-shell command):
+If there aren't any sites available where you want to stay, you can use
+the daemon command to check for sites while you do other things. Once
+you've set up your Pushsafer account, keep your API credentials handy
+and run the daemon:
 
 $ =rgov daemon <campground id(s)> --date <...> --length <...> --command <your command>=
 
-This will check every five minutes.
+Now we will automically check Recreation.gov every five minutes, and
+send a notification on Pushsafer if available site(s) exist.
 
-*** Commands
-**** Search
-
-Search for campground ids for user with the =check= and =daemon= commands:
-
-$ =rgov search <search term(s)>=
-
-Once you get the id, you can use that to check for availability.
-
-If the index has been built with descriptions (see the reindex command),
-you can search in the campground descriptions like this:
-
-$ =rgov search <search term(s)> --descriptions=
-
-**** Check
-
-The check command quickly searches campgrouns for availability and prints which
-sites are available, if any.
-
-$ =rgov check <campground id(s)> -date <mm-dd-yyyy> -length <nights>=
-
-| =--date[-d]=   | The date to check (mm-dd-yyyy)       |
-| =--length[-l]= | The number of days you'll be staying |
-| =--url[-u]=    | Show the url of campground           |
-
-**** Daemon
-
-Similiar to the =check= command, the =daemon= command starts a daemon that
-checks for availability every five minutes in the background. The method of
-notification is up to you, and can either be a notification program or custom
-shell command.
-
-$ =rgov daemon <campground id(s)> --date <mm-dd-yyyy> --length <nights> --notifier <notification program> --command <shell command>=
-
-| =--date[-d]=     | The date to check (mm-dd-yyyy)                     |
-| =--length[-l]=   | The number of days you'll be staying               |
-| =--notifier[-n]= | Specify a notification program to use (e.g. herbe) |
-| =--command[-c]=  | The shell command to run if site(s) are found      |
-
-*** Reindex
-
-This only needs to be run if you wish to search for campgrounds by description,
-which is useful for finding campground by city, region, or park name. It will
-download the facility data from recreation.gov, and build the index from that.
-
-You can add the descriptions to the search index like this:
-
-$ =rgov reindex --with-descriptions=
-
-For any reason, you can remove the descriptions with:
-
-$ =rgov reindex=
-
-** Todo
-
-[ ] Add additional ways for notifications to be sent (e.g. phone/email)
-
-[ ] Write more testing
+Use the =help= command to get more details about each command.
