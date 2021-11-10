@@ -115,18 +115,32 @@ def check(campground_id, request_dates, stay_dates):
     available_sites = get_available_sites(data, stay_dates)
     return campground_name, available_sites
 
-def generate_cli_output(campground_name: str, available_sites: list) -> str:
+def generate_cli_output(campground_name: str, available_sites: list, width: int) -> str:
     num_sites_available = len(available_sites)
+    text_output = ""
+    width += 22 # because the cleo color formatters must be included for
+                # column formatting
     if 1 <= num_sites_available <= 12:
         sorted_sites = ", ".join(sorted(available_sites))
-        text_output = (f"<question>{campground_name}</question> - "
-        f"<info>site(s) {sorted_sites} available</info>.")
+        col_1 = f"<question>{campground_name}</question>:"
+        col_2 = f"<fg=yellow>{sorted_sites}</> available"
+
     elif num_sites_available > 12:
-        text_output = (f"<question>{campground_name}</question> - "
-        f"<info>{num_sites_available} sites available</info>.")
+        col_1 =  f"<question>{campground_name}</question>:"
+        col_2 = f"<fg=green>{num_sites_available}</> sites available"
+
     else:
-        text_output = (f"<question>{campground_name}</question> - "
-        f"<fg=yellow>No sites available</fg=yellow>.")
-    return text_output
-    
+        col_1 = f"<question>{campground_name}</question>:"
+        col_2 = f"<fg=red>full</>"
+
+    return f"{col_1:{width}} {col_2}"
+
+
+def format_cli_error(campground_name, error, width):
+    width += 22
+    col_1 = f"<question>{campground_name}</question>:"
+    col_2 = "<error>error</>"
+    return f"{col_1:{width}} {col_2}"
+
+
 
