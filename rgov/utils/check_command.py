@@ -2,6 +2,7 @@ import csv
 import datetime
 import json
 
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from urllib.parse import urlencode
 
@@ -46,6 +47,7 @@ first of the month, in the format defined in
 rgov.utils.constants.Paths.request_time_format
 
     """
+    # raise HTTPError('http://example.com', 500, 'Internal Error', {}, None)
     requests = []
     for date in request_dates:
         url = f"{Urls.base_url}{campground_id}/month?"
@@ -62,7 +64,7 @@ rgov.utils.constants.Paths.request_time_format
         data_loaded = json.loads(data)
         try:
             campsite_data = data_loaded["campsites"]
-        except KeyError as e:
+        except KeyError:
             raise
         requests.append(campsite_data.values())
     return requests
@@ -106,8 +108,8 @@ def check(campground_id, request_dates, stay_dates):
     campground_name = get_campground_name(campground_id)
     try:
         data = request(request_dates, campground_id)
-    except Exception as e:
-        raise e
+    except HTTPError:
+        raise
     
     available_sites = get_available_sites(data, stay_dates)
     return campground_name, available_sites
