@@ -27,7 +27,6 @@ this options requires that the search index be rebuilt (see the
 """
     
     def handle(self):
-        """Search campground names and descriptions and print their name and id."""
         search_terms = self.argument("terms")
         
         if self.option("descriptions"):
@@ -40,4 +39,4 @@ this options requires that the search index be rebuilt (see the
             
         search_results = s_c.search(search_terms, target_column)
         for name, name_id in search_results:
-            self.line(f"<question>{name}</> - <info>{name_id}</>")
+            self.line(f"[<question>{name_id}</question>] {name}")
