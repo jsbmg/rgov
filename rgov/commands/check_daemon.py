@@ -108,7 +108,7 @@ option.
             if authenticated == False:
                 self.line("Invalid credentials.")
 
-        self.line("<fg=magenta>Daemon started.</fg=magenta>")
+        self.line("<fg=magenta>Starting to check.</fg=magenta>")
         
         with daemon.DaemonContext():
             logging.basicConfig(filename=Paths.log_file,
@@ -161,5 +161,3 @@ option.
                     return 0
                                            
                 time.sleep(300)  # wait 5 minutes before rechecking
-
-
