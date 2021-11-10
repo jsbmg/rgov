@@ -74,20 +74,25 @@ the descriptions included.
         Column 2 = Facility Description (if --with-descriptions)
         """
         os.makedirs(Paths.data_folder, exist_ok=True)
-
+        facilities_list = []
         with open(Paths.facilities_csv_path, "r") as in_file:
             reader = csv.reader(in_file)
-            with open(Paths.index_path, "w") as out_file:
-                writer = csv.writer(out_file)
-                for row in reader:
-                    # filter for reservable campgrounds with a non-empty name entry
-                    if row[7] == "Campground" and row[19] == "true" and row[5]:
-                        if descriptions is True:
-                            writer.writerow(
-                                [row[0], row[5].lower(), cleanhtml(row[6]).lower()]
-                            )
-                        else:
-                            writer.writerow([row[0], row[5].lower()])
+            for row in reader:
+                # filter for reservable campgrounds with a non-empty name entry
+                if row[7] == "Campground" and row[19] == "true" and row[5]:
+                    if descriptions is True:
+                        things.append(
+                            [row[0], row[5].lower(), cleanhtml(row[6]).lower()]
+                        )
+                    else:
+                        things.append([row[0], row[5].lower()])
+        # sort the entries alphabetically by name so search results are
+        # also alphabetical
+        facilities_list.sort(key=lambda x: x[1])
+        with open(Paths.index_path, "w") as out_file:
+            writer = csv.writer(out_file)
+            for row in things:
+                writer.writerow(row)
 
     def delete_temp_files(self):
         """
