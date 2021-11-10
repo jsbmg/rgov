@@ -18,7 +18,8 @@ def get_campground_name(campground_id: str) -> str:
         for row in reader:
             if campground_id in row[0]:
                 return row[1].title()
-    return "title n/a"
+            
+    raise IndexError(f'"{campground_id}" is not a valid id.')
 
 def get_request_dates(arrival_date: datetime.datetime, length_of_stay: int) -> list:
     "Generate dates for the Recreation.gov api request."
