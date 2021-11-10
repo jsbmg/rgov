@@ -2,6 +2,8 @@ import csv
 import datetime
 import time
 
+from urllib.error import HTTPError
+
 from cleo import Command
 from cleo.helpers import option, argument
 
@@ -114,8 +116,11 @@ class RunCommand(Command):
                 campground_name, available_sites = c_c.check(campground_id,
                                                              request_dates,
                                                              stay_dates)
-            except Exception as e:
-                self.line(e)
+            except HTTPError as e:
+                error_output = c_c.format_cli_error(campground_name,
+                                                    e,
+                                                    width)
+                self.line(error_output)
                 time.sleep(2)
                 continue
 
