@@ -43,9 +43,10 @@ def get_stay_dates(arrival_date: str, length_of_stay: int) -> list:
     return stay_dates
 
 def request(request_dates: list, campground_id: str) -> list:
-    """Request availability data for month(s). Each request date must be the
-first of the month, in the format defined in
-rgov.utils.constants.Paths.request_time_format
+    """Request availability data for month(s). 
+
+Each request date must be the first of the month, in the format defined
+in rgov.utils.constants.Paths.request_time_format.
 
     """
     # raise HTTPError('http://example.com', 500, 'Internal Error', {}, None)
