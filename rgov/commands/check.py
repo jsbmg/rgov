@@ -1,6 +1,8 @@
 import datetime
 import time
 
+from urllib.error import HTTPError
+
 from cleo import Command
 from cleo.helpers import argument, option
 
@@ -70,13 +72,18 @@ url along with the results for quickly navigating to the reservation web page.
         stay_dates = c_c.get_stay_dates(arrival_date, length_of_stay)
 
         campground_results = {}
+        results_table = []
+        width = max([len(c_c.get_campground_name(i)) for i in campground_ids])
         for campground_id in campground_ids:
             campground_name = c_c.get_campground_name(campground_id)
             
             try:
                 data = c_c.request(request_dates, campground_id)
-            except Exception as e:
-                print(e)
+            except HTTPError as e:
+                error_output = c_c.format_error_output(campground_name,
+                                                       e,
+                                                       width)
+                self.line(error_output)
                 continue
             
             available_sites = c_c.get_available_sites(data, stay_dates)
@@ -84,19 +91,16 @@ url along with the results for quickly navigating to the reservation web page.
             if self.option("chron-mode"):
                 campground_results[campground_name] = available_sites
             else:
-                text_output = c_c.generate_cli_output(campground_name,
-                                                      available_sites)
-                self.line(text_output)
+                output = c_c.generate_cli_output(campground_name,
+                                                 available_sites,
+                                                 width)
+                self.line(output)
                 
-            if campground_id != campground_ids[-1]:
-                time.sleep(1)
-
         if self.option("chron-mode"):
             message = pushsafer.gen_message(campground_results)
             if message:
-                print("Pushsafer: ", message)
-                
                 # TODO get api key without prompting
                 # pushsafer.notify(key, 'a', message)
+                print("Not yet implemented")
                 
         return 0       

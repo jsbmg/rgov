@@ -19,7 +19,7 @@ class RunCommand(Command):
         ]
 
     help = """"""
-    
+
     def handle(self):
         if self.option("descriptions"):
             # target_column determines which column of the csv is
@@ -29,49 +29,51 @@ class RunCommand(Command):
         else:
             target_column = 1
 
-        search_results = {}
-        selected_campgrounds = []
-        query = self.ask("Search for campgrounds:")
-        while query is not None:
-            # TODO make this understandable
-            query_list = query.split(" ")
-            if query_list[-1] == "-d":
-                target_column = 2
-                del query_list[-1]
+        campground_selections = {}
+        search_input = self.ask("Search for campgrounds:")
+        while search_input is not None:
+            search_input_list = search_input.split(" ")
+            # make name search default but if "-d" is appended then
+            # search descriptions
+            if search_input_list[-1] == "-d":
+                target_column = 2 # search descriptions
+                del search_input_list[-1] # but don't search for "-d"
             else:
-                target_column = 1
+                target_column = 1 # search names
                 
-            additional_results = s_c.search(query_list, target_column)
-            additional_results = {k: v for k, v in additional_results}
-            search_results.update(additional_results)
-            new_names = [name for name in additional_results.keys()]
-            if not new_names:
-                self.line(f"No results for {query}.")
+            search_results = s_c.search(search_input_list, target_column)
+            search_results = {name: num for name, num in search_results}
+            if search_results:
+                search_results["(none of the above)"] = None # python 3.7
+            
+            if not search_results:
+                self.line(f"No results for {search_input}.")
             else:
-                new_names.append("(none of the above)")
-                query = self.choice('Select campground(s)',
-                                    new_names,
-                                    multiple=True)
-                for campground in query:
-                    # it would be better to just hit enter to skip a
-                    # choice query but that would require modifying the
-                    # cleo source code
+                search_input = self.choice('Select campground(s)',
+                                           list(search_results.keys()),
+                                           multiple=True)
+                for campground in search_input:
+                    # provides a way to continue without selecting any
+                    # of the search results
                     if campground == "(none of the above)":
                         pass
                     else:
-                        selected_campgrounds.append(campground)
-            query = self.ask("\nSearch for more campgrounds "
+                        campground_selections[campground] = search_results[campground]
+                        
+            search_input = self.ask("\nSearch for more campgrounds "
                              "(or press Enter to continue):")
-        if not selected_campgrounds:
+
+            
+        if not campground_selections:
             self.line("Nothing to do.")
             return 0
         self.line("<info>Your selections</>: ")
-        for name in selected_campgrounds:
+        for name in campground_selections.keys():
             self.line(f"· <fg=yellow>{name}</>")
         self.line("")
 
-        ids = [search_results[name] for name in selected_campgrounds]
-
+#        ids = [search_results[name] for name in selected_campgrounds]
+        ids = campground_selections.values()
         def month_validator(num):
             if int(num) not in range(1,13):
                 raise Exception("Not a digit from 1-12.")
@@ -109,9 +111,11 @@ class RunCommand(Command):
                                                         length_of_stay)
         stay_dates = c_c.get_stay_dates(arrival_date_parsed, length_of_stay)
 
-        self.line("<fg=green>Checking</>:")
         unavailable = []
-        for campground_id in ids:
+        width = max(map(len, campground_selections))
+        cli_table = []
+        self.line("<fg=green>Available</>:")
+        for campground_name, campground_id in campground_selections.items():
             try:
                 campground_name, available_sites = c_c.check(campground_id,
                                                              request_dates,
@@ -124,16 +128,18 @@ class RunCommand(Command):
                 time.sleep(2)
                 continue
 
-            text_output = c_c.generate_cli_output(campground_name,
-                                                             available_sites)
-            self.line(text_output)
-            
+            output = c_c.generate_cli_output(campground_name,
+                                             available_sites,
+                                             width)
+            self.line(output)
+                      
             if not available_sites:
                 unavailable.append(campground_id)
-                
+
+
         if unavailable:
             self.line("")
-            daemon_question = ("One or more campground(s) are unavailable. "
+            daemon_question = ("One or more campground(s) unavailable. "
                                "Start daemon?")
             if not self.confirm(daemon_question, False):
                 return
