@@ -81,17 +81,17 @@ the descriptions included.
                 # filter for reservable campgrounds with a non-empty name entry
                 if row[7] == "Campground" and row[19] == "true" and row[5]:
                     if descriptions is True:
-                        things.append(
+                        facilities_list.append(
                             [row[0], row[5].lower(), cleanhtml(row[6]).lower()]
                         )
                     else:
-                        things.append([row[0], row[5].lower()])
+                        facilities_list.append([row[0], row[5].lower()])
         # sort the entries alphabetically by name so search results are
         # also alphabetical
         facilities_list.sort(key=lambda x: x[1])
         with open(Paths.index_path, "w") as out_file:
             writer = csv.writer(out_file)
-            for row in things:
+            for row in facilities_list:
                 writer.writerow(row)
 
     def delete_temp_files(self):
