@@ -116,7 +116,7 @@ def check(campground_id, request_dates, stay_dates):
     available_sites = get_available_sites(data, stay_dates)
     return campground_name, available_sites
 
-def generate_cli_output(campground_name: str, available_sites: list, width: int) -> str:
+def format_cli_output(campground_name: str, available_sites: list, width: int) -> str:
     num_sites_available = len(available_sites)
     text_output = ""
     width += 22 # because the cleo color formatters must be included for

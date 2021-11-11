@@ -91,9 +91,9 @@ url along with the results for quickly navigating to the reservation web page.
             if self.option("chron-mode"):
                 campground_results[campground_name] = available_sites
             else:
-                output = c_c.generate_cli_output(campground_name,
-                                                 available_sites,
-                                                 width)
+                output = c_c.format_cli_output(campground_name,
+                                               available_sites,
+                                               width)
                 self.line(output)
                 
         if self.option("chron-mode"):
