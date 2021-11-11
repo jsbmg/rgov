@@ -13,21 +13,21 @@ from rgov.utils import check_command as c_c
 class RunCommand(Command):
 
     name = "run"
-    description = "Run interactively"
-    options = [
-        option("descriptions", "d", "Search descriptions")
-        ]
+    description = "Seach and check for campground availability interactively"
 
-    help = """"""
+    help = """
+The run command provides a method to select and and check campgrounds
+for availability interactively. It is run with no arguments or options.
+
+A selection list is built by searching for and selecting campgrounds
+by name. If a "-d" is appended to the search, campgrounds will be
+matched by their descriptions. For example, a search for "san diego
+-d" returns all campgrounds that have the words "san" and "diego"
+in their descriptions, but a search for "laguna" without "-d" is
+more specific because it only searches for names that match "laguna."
+"""
 
     def handle(self):
-        if self.option("descriptions"):
-            # target_column determines which column of the csv is
-            # searched. '2' is the campsite descriptions and '1' is the
-            # campsite names.
-            target_column = 2 
-        else:
-            target_column = 1
 
         campground_selections = {}
         search_input = self.ask("Search for campgrounds:")
@@ -44,11 +44,8 @@ class RunCommand(Command):
             search_results = s_c.search(search_input_list, target_column)
             search_results = {name: num for name, num in search_results}
             if search_results:
-                search_results["(none of the above)"] = None # python 3.7
-            
-            if not search_results:
-                self.line(f"No results for {search_input}.")
-            else:
+                # note this requires orderded dicts new in python 3.7
+                search_results["(none of the above)"] = None 
                 search_input = self.choice('Select campground(s)',
                                            list(search_results.keys()),
                                            multiple=True)
@@ -59,9 +56,13 @@ class RunCommand(Command):
                         pass
                     else:
                         campground_selections[campground] = search_results[campground]
-                        
+            else: 
+                no_results_msg = (f"No results for {search_input}. " 
+                                   "Try appending \"-d\".")
+                self.line(no_results_msg)
+
             search_input = self.ask("\nSearch for more campgrounds "
-                             "(or press Enter to continue):")
+                                    "(or press Enter to continue):")
 
             
         if not campground_selections:
@@ -69,10 +70,9 @@ class RunCommand(Command):
             return 0
         self.line("<info>Your selections</>: ")
         for name in campground_selections.keys():
-            self.line(f"· <fg=yellow>{name}</>")
+            self.line(f"* <fg=yellow>{name}</>")
         self.line("")
 
-#        ids = [search_results[name] for name in selected_campgrounds]
         ids = campground_selections.values()
         def month_validator(num):
             if int(num) not in range(1,13):
@@ -112,9 +112,8 @@ class RunCommand(Command):
         stay_dates = c_c.get_stay_dates(arrival_date_parsed, length_of_stay)
 
         unavailable = []
-        width = max(map(len, campground_selections))
-        cli_table = []
-        self.line("<fg=green>Available</>:")
+        col_width = max(map(len, campground_selections))
+        self.line("<fg=green>Checking</>:")
         for campground_name, campground_id in campground_selections.items():
             try:
                 campground_name, available_sites = c_c.check(campground_id,
@@ -128,9 +127,9 @@ class RunCommand(Command):
                 time.sleep(2)
                 continue
 
-            output = c_c.generate_cli_output(campground_name,
-                                             available_sites,
-                                             width)
+            output = c_c.format_cli_output(campground_name,
+                                           available_sites,
+                                           col_width)
             self.line(output)
                       
             if not available_sites:
