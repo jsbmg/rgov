@@ -13,17 +13,17 @@ from rgov.utils import check_command as c_c
 class RunCommand(Command):
 
     name = "run"
-    description = "Seach and check for campground availability interactively"
+    description = "Run interactively"
 
     help = """
-The run command provides a method to select and and check campgrounds
+The <info>run</> command provides a method to select and and check campgrounds
 for availability interactively. It is run with no arguments or options.
 
 A selection list is built by searching for and selecting campgrounds
-by name. If a "-d" is appended to the search, campgrounds will be
-matched by their descriptions. For example, a search for "san diego
--d" returns all campgrounds that have the words "san" and "diego"
-in their descriptions, but a search for "laguna" without "-d" is
+by name. If <comment>-d</> is appended to the search, campgrounds will be
+matched by their descriptions. For example, a search for <comment>san diego
+-d</> returns all campgrounds that have the words "san" and "diego"
+in their descriptions, but a search for <comment>laguna</> without <comment>-d</> is
 more specific because it only searches for names that match "laguna."
 """
 
@@ -113,7 +113,7 @@ more specific because it only searches for names that match "laguna."
 
         unavailable = []
         col_width = max(map(len, campground_selections))
-        self.line("<fg=green>Checking</>:")
+        self.line("<fg=green>Availability</>:")
         for campground_name, campground_id in campground_selections.items():
             try:
                 campground_name, available_sites = c_c.check(campground_id,
@@ -122,7 +122,7 @@ more specific because it only searches for names that match "laguna."
             except HTTPError as e:
                 error_output = c_c.format_cli_error(campground_name,
                                                     e,
-                                                    width)
+                                                    col_width)
                 self.line(error_output)
                 time.sleep(2)
                 continue
@@ -139,7 +139,7 @@ more specific because it only searches for names that match "laguna."
         if unavailable:
             self.line("")
             daemon_question = ("One or more campground(s) unavailable. "
-                               "Start daemon?")
+                               "Start rgov daemon?")
             if not self.confirm(daemon_question, False):
                 return
             else:
