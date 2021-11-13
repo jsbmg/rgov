@@ -137,7 +137,7 @@ def format_cli_output(campground_name: str, available_sites: list, width: int) -
     return f"{col_1:{width}} {col_2}"
 
 
-def format_cli_error(campground_name, error, width):
+def format_error_output(campground_name, error, width):
     width += 22
     col_1 = f"<question>{campground_name}</question>:"
     col_2 = "<error>error</>"
