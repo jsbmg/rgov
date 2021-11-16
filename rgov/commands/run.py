@@ -4,11 +4,12 @@ import time
 
 from urllib.error import HTTPError
 
-from cleo import Command
 from cleo.helpers import option, argument
+from cleo import Command
 
-from rgov.utils import search_command as s_c
-from rgov.utils import check_command as c_c
+from rgov.campground import Campground
+from rgov.dates import Dates
+from rgov.search import search 
 
 class RunCommand(Command):
 
@@ -29,7 +30,9 @@ more specific because it only searches for names that match "laguna."
 
     def handle(self):
 
-        campground_selections = {}
+        campgrounds = [] 
+        campground_names = []
+        column_width = 0
         search_input = self.ask("Search for campgrounds:")
         while search_input is not None:
             search_input_list = search_input.split(" ")
@@ -41,7 +44,7 @@ more specific because it only searches for names that match "laguna."
             else:
                 target_column = 1 # search names
                 
-            search_results = s_c.search(search_input_list, target_column)
+            search_results = search(search_input_list, target_column)
             search_results = {name: num for name, num in search_results}
             if search_results:
                 # note this requires orderded dicts new in python 3.7
@@ -55,7 +58,12 @@ more specific because it only searches for names that match "laguna."
                     if campground == "(none of the above)":
                         pass
                     else:
-                        campground_selections[campground] = search_results[campground]
+                        id_num = search_results[campground]
+                        campgrounds.append(Campground(id_num))
+                        campground_names.append(campground)
+                        len_name = len(campground)
+                        if column_width < len_name:
+                            column_width = len_name
             else: 
                 no_results_msg = (f"No results for {search_input}. " 
                                    "Try appending \"-d\".")
@@ -64,16 +72,14 @@ more specific because it only searches for names that match "laguna."
             search_input = self.ask("\nSearch for more campgrounds "
                                     "(or press Enter to continue):")
 
-            
-        if not campground_selections:
+        if not campgrounds:
             self.line("Nothing to do.")
             return 0
         self.line("<info>Your selections</>: ")
-        for name in campground_selections.keys():
-            self.line(f"* <fg=yellow>{name}</>")
+        for campground in campground_names:
+            self.line(f"* <fg=yellow>{campground}</>")
         self.line("")
 
-        ids = campground_selections.values()
         def month_validator(num):
             if int(num) not in range(1,13):
                 raise Exception("Not a digit from 1-12.")
@@ -102,47 +108,38 @@ more specific because it only searches for names that match "laguna."
         year.set_validator(year_validator)
         year = self.ask(year)
 
-        length_of_stay = int(self.ask('Enter number of nights:'))
+        length_input = self.ask('Enter number of nights:')
         self.line("")
 
-        arrival_date = f"{month}-{day}-{year}"
-        arrival_date_parsed = c_c.parse_arrival_date(arrival_date)
-        request_dates = c_c.get_request_dates(arrival_date_parsed,
-                                                        length_of_stay)
-        stay_dates = c_c.get_stay_dates(arrival_date_parsed, length_of_stay)
+        date_input = f"{month}-{day}-{year}"
 
+        dates = Dates(date_input, length_input)
         unavailable = []
-        col_width = max(map(len, campground_selections))
+
         self.line("<fg=green>Availability</>:")
-        for campground_name, campground_id in campground_selections.items():
+
+        for campground in campgrounds:
             try:
-                campground_name, available_sites = c_c.check(campground_id,
-                                                             request_dates,
-                                                             stay_dates)
-            except HTTPError as e:
-                error_output = c_c.format_cli_error(campground_name,
-                                                    e,
-                                                    col_width)
-                self.line(error_output)
+                campground.get_available(dates.request_dates, dates.stay_dates)
+
+            except (HTTPError, IndexError) as error:
+                self.line(campgorund.gen_cli_text(column_width, error)) 
                 time.sleep(2)
                 continue
 
-            output = c_c.format_cli_output(campground_name,
-                                           available_sites,
-                                           col_width)
-            self.line(output)
+            self.line(campground.gen_cli_text(column_width))
                       
-            if not available_sites:
-                unavailable.append(campground_id)
-
+            if len(campground.available) == 0:
+                unavailable.append(campground.id_num)
 
         if unavailable:
             self.line("")
             daemon_question = ("One or more campground(s) unavailable. "
                                "Start rgov daemon?")
+
             if not self.confirm(daemon_question, False):
                 return
             else:
                 ids = " ".join(unavailable)
-                args = ids + f" -d {arrival_date} -l {length_of_stay}"
+                args = f"{date_input} {length_input} {ids}"
                 self.call('daemon', args)
