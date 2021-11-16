@@ -2,16 +2,13 @@ import csv
 
 from typing import Generator
 
-from rgov.utils.constants import Paths
-
+from rgov import locations
 
 def search(search_terms: str, target_column: int) -> Generator[tuple[str, str], None, None]:
     search_terms_lowercase = [term.lower() for term in search_terms]
     num_search_terms = len(search_terms)
-    
-    search_results = {}
     try:
-        with open(Paths.index_path, "r") as i:
+        with open(locations.INDEX_PATH, "r") as i:
             reader = csv.reader(i)
             try:
                 for row in reader:
@@ -21,7 +18,7 @@ def search(search_terms: str, target_column: int) -> Generator[tuple[str, str], 
                             count += 1
                             if count == num_search_terms:
                                 yield row[1].title(), row[0]
-                                
+
             except IndexError:
                 # occurs when trying to search descriptions but the
                 # index wasn't built including them
