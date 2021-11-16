@@ -8,7 +8,8 @@ import zipfile
 from cleo import Command
 from cleo.helpers import option
 
-from rgov.utils.constants import Paths, Urls
+from rgov import locations, pushsafer
+
 
 def cleanhtml(raw_html) -> str:
     cleanr = re.compile("<.*?>")
@@ -17,6 +18,8 @@ def cleanhtml(raw_html) -> str:
 
 
 class InitCommand(Command):
+
+    _DOWNLOAD_URL = "https://ridb.recreation.gov/downloads/RIDBFullExport_V1_CSV.zip"
 
     name = "init"
     description = "Update the campground id search index"
@@ -41,14 +44,14 @@ the descriptions included.
     ]
 
     def ensure_download_dir_exists(self):
-        os.makedirs(Paths.download_folder, exist_ok=True)
+        os.makedirs(locations.DOWNLOAD_FOLDER, exist_ok=True)
 
     def request_ridb_data(self):
-        urllib.request.urlretrieve(Urls.download_url, Paths.download_path)
+        urllib.request.urlretrieve(self._DOWNLOAD_URL, locations.DOWNLOAD_PATH)
 
     def unzip_ridb_data(self):
-        with zipfile.ZipFile(Paths.download_path, "r") as zip_ref:
-            zip_ref.extractall(Paths.download_folder)
+        with zipfile.ZipFile(locations.DOWNLOAD_PATH, "r") as zip_ref:
+            zip_ref.extractall(locations.DOWNLOAD_FOLDER)
 
     def generate_index(self, descriptions):
         """
@@ -73,9 +76,9 @@ the descriptions included.
         Column 1 = Facility Name
         Column 2 = Facility Description (if --with-descriptions)
         """
-        os.makedirs(Paths.data_folder, exist_ok=True)
+        os.makedirs(locations.DATA_FOLDER, exist_ok=True)
         facilities_list = []
-        with open(Paths.facilities_csv_path, "r") as in_file:
+        with open(locations.FACILITIES_CSV_PATH, "r") as in_file:
             reader = csv.reader(in_file)
             for row in reader:
                 # filter for reservable campgrounds with a non-empty name entry
@@ -83,13 +86,14 @@ the descriptions included.
                     if descriptions is True:
                         facilities_list.append(
                             [row[0], row[5].lower(), cleanhtml(row[6]).lower()]
+         
                         )
                     else:
                         facilities_list.append([row[0], row[5].lower()])
         # sort the entries alphabetically by name so search results are
         # also alphabetical
         facilities_list.sort(key=lambda x: x[1])
-        with open(Paths.index_path, "w") as out_file:
+        with open(locations.INDEX_PATH, "w") as out_file:
             writer = csv.writer(out_file)
             for row in facilities_list:
                 writer.writerow(row)
@@ -99,14 +103,13 @@ the descriptions included.
         Removes the project-local downlaod folder
         and its contents.
         """
-        shutil.rmtree(Paths.download_folder)
+        shutil.rmtree(locations.DOWNLOAD_FOLDER)
 
-    def handle(self):
+    def handle(self) -> int:
         descriptions = self.option("with-descriptions")
-
         steps = [
-            ("Ensuring download directory exists", self.ensure_download_dir_exists),
-            (f"Downloading data from {Urls.download_url}", self.request_ridb_data),
+            ("Checking download directory", self.ensure_download_dir_exists),
+            (f"Downloading data from {self._DOWNLOAD_URL}", self.request_ridb_data),
             ("Unzipping", self.unzip_ridb_data),
             ("Generating index", self.generate_index),
             ("Deleting temporary files", self.delete_temp_files),
@@ -128,3 +131,4 @@ the descriptions included.
             self.overwrite(format + f"<comment>done</comment>.")
 
         self.line("")
+        return 0

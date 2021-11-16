@@ -1,6 +1,7 @@
 import datetime
 import getpass
 import logging
+import os
 import time
 
 import daemon
@@ -8,8 +9,11 @@ import daemon
 from cleo import Command
 from cleo.helpers import option, argument
 
-from rgov.utils import check_command, pushsafer
-from rgov.utils.constants import Paths
+from rgov import locations
+from rgov import pushsafer
+from rgov.campground import Campground
+from rgov.dates import Dates
+
 
 class DaemonCommand(Command):
 
@@ -42,25 +46,12 @@ option.
 """
 
     arguments = [
+        argument("date", "The date of your arrival (mm-dd-yyyy)"),
+        argument("length", "The length of stay in nights"),
         argument("id", "The campground id(s) to check", multiple=True),
     ]
 
     options = [
-        option(
-            "length",
-            "l",
-            "Length of stay in nights [3 nights]",
-            flag=False,
-            value_required=True,
-        ),
-        option("forever", "f", "Don't exit after finding first available sites"),
-        option(
-            "date",
-            "d",
-            "The date of your arrival, in mm-dd-yyyy format [today]",
-            flag=False,
-            value_required=True,
-        ),
         option(
             "notify-limit",
             "N",
@@ -78,85 +69,77 @@ option.
     ]
 
     def handle(self) -> int:
-        campground_ids = self.argument("id")
-
-        if self.option("date"):
-            date_input = self.option("date")
-            arrival_date = check_command.parse_arrival_date(date_input)
-        else:
-            arrival_date = datetime.date.today()
-            
-        if self.option("length"):
-            length_input = self.option("length")
-            length_of_stay = check_command.parse_length_of_stay(length_input)
-        else:
-            length_of_stay = 3
+        id_input = self.argument("id")
+        date_input = self.argument("date")
+        length_input = self.argument("length")
             
         if self.option("notify-limit"):
-            notify_limit = self.option("notify-limit")
+            notify_limit = int(self.option("notify-limit"))
         else:
             notify_limit = 3
             
-        request_dates = check_command.get_request_dates(arrival_date, length_of_stay)
-        stay_dates = check_command.get_stay_dates(arrival_date, length_of_stay)
+        dates = Dates(date_input, length_input)
+        campgrounds = [Campground(id) for id in id_input]
 
         # make sure the api key works
-        authenticated = False
+        if os.path.exists(locations.AUTH_FILE):
+            ps_username, ps_api_key = pushsafer.read_credentials()
+            authenticated = pushsafer.validate_key(ps_username, ps_api_key)
+        else:
+            authenticated = False
         while authenticated == False:
             ps_username, ps_api_key = pushsafer.input_credentials()
             authenticated = pushsafer.validate_key(ps_username, ps_api_key)
             if authenticated == False:
                 self.line("Invalid credentials.")
+            else:
+                if self.confirm("Save for future use?", False):
+                    pushsafer.write_credentials(ps_username, ps_api_key)
 
         self.line("<fg=magenta>Starting to check.</fg=magenta>")
-        
         with daemon.DaemonContext():
-            logging.basicConfig(filename=Paths.log_file,
+            logging.basicConfig(filename=locations.LOG_FILE,
                                 filemode='a',
                                 format='[%(asctime)s] %(message)s',
                                 datefmt='%Y/%d/%m %H:%M:%S',
                                 level=logging.INFO)
             logging.info('starting to search')
             
-            notifications_sent = 0
+            notification_counter = 0
             
             while True:
                 logging.info('------------checking------------')
-                campgrounds = {}
-                found_available = False
-                for campground_id in campground_ids:
-                    campground_name = check_command.get_campground_name(campground_id)
+                available = {} 
+                for campground in campgrounds:
                     try:
-                        data = check_command.request(request_dates, campground_id)
-                    except HTTPError as e:
-                        logging.error(e)
+                        campground.get_available(dates.request_dates, dates.stay_dates)
+
+                    except (HTTPError, IndexError) as error:
+                        logging.error(error)
                         time.sleep(10)
                         continue
                         
-                    available_sites = check_command.get_available_sites(data, stay_dates)
-                    
-                    if available_sites:
-                        logging.info(f'{campground_name} - found available site(s)')
-                        campgrounds[campground_name] = available_sites
-                        found_available = True
+                    if len(campground.available) > 0:
+                        logging.info(f'{campground.name} - found available site(s)')
+                        available[campground.name] = campground.available
                     else:
-                        logging.info(f'{campground_name} - no available site(s)')
+                        logging.info(f'{campground.name} - no available site(s)')
 
-                    if campground_id != campground_ids[-1]:
+                    if campground != campgrounds[-1]:
                         time.sleep(1)
 
-                if found_available:
-                    message = pushsafer.gen_notifier_text(campgrounds)
+                if available:
+                    message = pushsafer.gen_notifier_text(available)
                     pushsafer_status = pushsafer.notify(ps_api_key, 'a', message)
                     if pushsafer_status['status'] == 0:
                         logging.error(f"Pushsafer: {pushsafer_status}")
                     else:
                         logging.info(f"Pushsafer: {pushsafer_status}")
-                    notifications_sent += 1
-                    
-                if notifications_sent == notify_limit:
+                    notification_counter += 1
+                if notification_counter == notify_limit:
                     reached_notify_limit = ("notification limit reached "
-                                            f"[{num_anotifications}] - exiting")
+                                            f"[{notification_counter}/" 
+                                            f"{notify_limit}] - exiting")
                     logging.info(reached_notify_limit)
                     return 0
                                            
