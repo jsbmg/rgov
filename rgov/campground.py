@@ -78,7 +78,7 @@ class Campground:
                             self._name = row[1].title()
                             return self._name 
             except FileNotFoundError:
-                error_msg = "Index missing. Try running the 'init' command to create it."
+                error_msg = "Campground index missing. Try running the 'init' command to create it."
                 raise FileNotFoundError(error_msg)
             raise IndexError(f'"{self.id_num}" is not a valid campground id.')
 
@@ -99,10 +99,6 @@ class Campground:
             return self._url
 
     def gen_cli_text(self, width=None, error=None):
-        try:
-            num_available_sites = len(self.available)
-        except AvailabilityNotFoundError:
-            raise
         if not width:
             width = len(self.name)
         width += 22
@@ -110,8 +106,12 @@ class Campground:
         if error:
             col_1 = f"<question>{self.name}</question>"
             col_2 = f"<error>{error}</>"
-
         else:
+            try:
+                num_available_sites = len(self.available)
+            except AvailabilityNotFoundError:
+                raise
+
             if 1 <= num_available_sites <= 12:
                 sorted_sites = ", ".join(self.available)
                 col_1 = f"<question>{self.name}</question>:"
@@ -127,4 +127,5 @@ class Campground:
 
         self._cli_text = f"{col_1:{width}} {col_2}" 
         return self._cli_text 
+
 

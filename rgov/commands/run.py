@@ -13,6 +13,52 @@ from rgov.search import search
 
 class RunCommand(Command):
 
+    def add_campgrounds(self):
+        campgrounds = {}
+        search_input = self.ask("Search for campgrounds:")
+        if not search_input:
+            return {}
+        search_input_list = search_input.split(" ")
+
+        if search_input_list[-1] == "-d":
+            target_column = 2
+            del search_input_list[-1]
+        else:
+            target_column = 1
+
+        search_results = search(search_input_list, target_column)
+        search_results = {name: num for name, num in search_results}
+
+        if search_results:
+            search_results["(none of the above)"] = None
+            search_input = self.choice('Select campground(s)',
+                                       list(search_results.keys()),
+                                       multiple=True)
+            for campground in search_input:
+                if campground == "(none of the above)":
+                    pass
+                else:
+                    id_num = search_results[campground]
+                    campgrounds[campground] = Campground(id_num)
+        else:
+            no_results_msg = (f"No results for {search_input}. "
+                               "Try appending \"-d\".")
+            self.line(no_results_msg)
+
+        return campgrounds 
+
+    def selections_empty(self, campgrounds: dict):
+        if not campgrounds:
+            self.line("Nothing to do.")
+            return True 
+        else:
+            return False 
+
+    def print_selections(self, campgrounds):
+        self.line("\n<info>Currently selected:</>")
+        for campground in campgrounds:
+             self.line(f"* <fg=yellow>{campground}</>")
+
     name = "run"
     description = "Run interactively"
 
@@ -29,56 +75,37 @@ more specific because it only searches for names that match "laguna."
 """
 
     def handle(self):
-
-        campgrounds = [] 
-        campground_names = []
-        column_width = 0
-        search_input = self.ask("Search for campgrounds:")
-        while search_input is not None:
-            search_input_list = search_input.split(" ")
-            # make name search default but if "-d" is appended then
-            # search descriptions
-            if search_input_list[-1] == "-d":
-                target_column = 2 # search descriptions
-                del search_input_list[-1] # but don't search for "-d"
-            else:
-                target_column = 1 # search names
-                
-            search_results = search(search_input_list, target_column)
-            search_results = {name: num for name, num in search_results}
-            if search_results:
-                # note this requires orderded dicts new in python 3.7
-                search_results["(none of the above)"] = None 
-                search_input = self.choice('Select campground(s)',
-                                           list(search_results.keys()),
-                                           multiple=True)
-                for campground in search_input:
-                    # provides a way to continue without selecting any
-                    # of the search results
-                    if campground == "(none of the above)":
-                        pass
-                    else:
-                        id_num = search_results[campground]
-                        campgrounds.append(Campground(id_num))
-                        campground_names.append(campground)
-                        len_name = len(campground)
-                        if column_width < len_name:
-                            column_width = len_name
-            else: 
-                no_results_msg = (f"No results for {search_input}. " 
-                                   "Try appending \"-d\".")
-                self.line(no_results_msg)
-
-            search_input = self.ask("\nSearch for more campgrounds "
-                                    "(or press Enter to continue):")
+        campgrounds = self.add_campgrounds()
 
         if not campgrounds:
-            self.line("Nothing to do.")
+            campgrounds = self.add_campgrounds()
+
+        if self.selections_empty(campgrounds):
             return 0
-        self.line("<info>Your selections</>: ")
-        for campground in campground_names:
-            self.line(f"* <fg=yellow>{campground}</>")
+
+        self.print_selections(campgrounds)
+
+        choice = self.ask("\nWhat now? ([a]dd [r]emove [c]ontinue):")
+        while choice != "c":
+            if choice == "a":
+                new = self.add_campgrounds()
+                campgrounds.update(new) 
+
+            elif choice == "r":
+               subtract = self.choice("Select a campground(s) to remove:",
+                                    list(campgrounds.keys()),
+                                    multiple=True)
+               for item in subtract:
+                   del campgrounds[item]
+
+            self.print_selections(campgrounds)
+            choice = self.ask("\nWhat now? (a)dd (r)emove (c)ontinue?")
+
+        if self.selections_empty(campgrounds):
+            return 0
+
         self.line("")
+        column_width = max(map(len, campgrounds))
 
         def month_validator(num):
             if int(num) not in range(1,13):
@@ -118,12 +145,12 @@ more specific because it only searches for names that match "laguna."
 
         self.line("<fg=green>Availability</>:")
 
-        for campground in campgrounds:
+        for campground in campgrounds.values():
             try:
                 campground.get_available(dates.request_dates, dates.stay_dates)
 
             except (HTTPError, IndexError) as error:
-                self.line(campgorund.gen_cli_text(column_width, error)) 
+                self.line(campground.gen_cli_text(column_width, error)) 
                 time.sleep(2)
                 continue
 
