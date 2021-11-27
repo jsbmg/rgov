@@ -10,6 +10,7 @@ PROJECT_ROOT = get_project_root()
 
 DOWNLOAD_FOLDER = os.path.join(PROJECT_ROOT, "assets")
 DOWNLOAD_PATH = os.path.join(DOWNLOAD_FOLDER, "RIDBExport.zip")
+FACILITIES_CSV_PATH = os.path.join(DOWNLOAD_FOLDER, "Facilities_API_v1.csv")
 
 DATA_FOLDER = os.path.join(PROJECT_ROOT, "data")
 FACILITIES_DB = os.path.join(DATA_FOLDER, "rgov.db")
