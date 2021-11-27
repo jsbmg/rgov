@@ -30,7 +30,7 @@ class Campground:
         self._url = None
         self._cli_text = None
 
-    def get_available(self, request_dates: list, stay_dates: list):
+    def _request(self, request_dates: list, stay_dates: list) -> list:
         endpoint = "https://www.recreation.gov/api/camps/availability/campground"
         requests = []
         for date in request_dates:
@@ -51,7 +51,13 @@ class Campground:
             except KeyError:
                 raise
             requests.append(campsite_data.values())
-           
+        return requests
+
+    def get_available(self, request_dates: list, stay_dates: list):
+        try:
+            requests = self._request(request_dates, stay_dates)   
+        except (HTTPError, KeyError):
+            raise
         available_sites = []
         last_day = stay_dates[-1]
         for request in requests:
