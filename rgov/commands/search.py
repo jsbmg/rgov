@@ -14,16 +14,19 @@ class SearchCommand(Command):
         option("interactive", "i", "Interact with the search results")
     ]
 
-    help = """The <info>search</info> command searches text to find campground
-ids. Multiple search terms can be separated by spaces, to search in an
-orderless fashion, or in quotes, to search for exact matches.
+    help = """The <question>search</> command searches a local database for campground id(s). By default, search arguments are matched with the name of the campground, but the <comment>descriptions</> option can be enabled to search for matching descriptions.
 
-By default, the keywords are matched against campground names. The<comment>
---descriptions </comment>option searches against campground descriptions, but
-this options requires that the search index be rebuilt (see the
-<info>reindex</info> command). This can be done with:
+The campground index can always be rebuilt or updated via the <question>init</> command.
 
-<info>rgov reindex --with-descriptions</info>.
+<options=bold>Examples:</>
+
+Search for all campgrounds associated with the Grand Canyon:
+
+    $ <info>rgov search -d grand canyon</>
+
+Search for the campground "North Rim Campground":
+
+    $ <info>rgov search north rim</>
 """
     
     def handle(self):

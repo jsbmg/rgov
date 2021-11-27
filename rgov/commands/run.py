@@ -62,18 +62,12 @@ class RunCommand(Command):
     name = "run"
     description = "Run interactively"
 
-    help = """
-The <info>run</> command provides a method to select and and check campgrounds
-for availability interactively. It is run with no arguments or options.
+    help = """The <question>run</> command is an interactive alternative to the <question>search</>, <question>check</>, and <question>daemon</> commands. 
 
-A selection list is built by searching for and selecting campgrounds
-by name. If <comment>-d</> is appended to the search, campgrounds will be
-matched by their descriptions. For example, a search for <comment>san diego
--d</> returns all campgrounds that have the words "san" and "diego"
-in their descriptions, but a search for <comment>laguna</> without <comment>-d</> is
-more specific because it only searches for names that match "laguna."
+Searching for campgrounds and setting the dates are done via prompt. If any or all of the selected campgrounds are unavailable, a confirmation prompt will ask if the <question>daemon</> should be started, which will check for availability every five minutes and send a notification via Pushsafer if availability is found (a Pushsafer account an API key is required for this).  
+
+When searching for campgrounds interactively, note that a "-d" appended to the search terms will check for matching campground descriptions, whereas the default is to search for campgrounds by name (more information on description vs. name searches can be found in the help section for the <question>search</> command). 
 """
-
     def handle(self):
         campgrounds = self.add_campgrounds()
 

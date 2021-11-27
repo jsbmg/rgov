@@ -24,22 +24,20 @@ class InitCommand(Command):
     name = "init"
     description = "Update the campground id search index"
 
-    help = """The <info>init</info> command downloads facility data from
-recreation.gov and builds a searchable database from that.
+    help = """The <question>init</> command is for interactively setting Pushsafer API credentials and/or rebuilding the campground database, which is a csv file of campground names, ids, and optionally their corresponding descriptions. 
 
-By default, the database is built with campground names and ids. The<comment>
---with-descriptions </comment>option includes campground descriptions in the
-index, which can be useful for searching for attributes like park name, state,
-or city. The size of the database with just names is ~128kb, and is ~9mb with
-the descriptions included.
+<options=bold>Examples:</>
 
+Build the campground databse with descriptions (and optionally enter Pushsafer API credentials):
+
+    $ <info>poetry run rgov init --with-descriptions</>
 """
 
     options = [
         option(
             "with-descriptions",
             "w",
-            "Whether to include descriptions in the search database.",
+            "Whether to include descriptions in the search database",
         )
     ]
 

@@ -1,4 +1,5 @@
 import datetime
+
 import time
 
 from urllib.error import HTTPError
@@ -28,21 +29,21 @@ class CheckCommand(Command):
     ]
 
 
-    help = """The <info>check</info> command checks campground(s) for availability on the
-dates of stay and prints the results to the terminal. The following example
-checks for a three night stay starting on October 12, 2021 at Laguna:
+    help = """The <question>check</> command prints out a summary of campsite availability for the the given campground(s) over the specified date range. 
 
-<info>rgov check 232279 -date 10-12-2021 -length 3</info>
+All three arguments are required, and the campground id(s) must be the final argument. The id(s) can be found using the <question>search</> command or by finding the number that is in the url on the corresponding campground's www.recreation.gov webpage.  
 
-Campground ids can be found using <info>search</info> command. To check multiple
-campgrounds, separate the campground ids with spaces:
+The cron-mode option will send a Pushsafer notification (if set up). It is intended as a replacement for the <question>daemon</> command, if running a daemon is not desirable or the system is not Unix.  
 
-<info>rgov check 232279 232278</info>
+<options=bold>Examples:</>
 
-Unless otherwise specified, the command checks for the current date and a
-length of stay of three days. The <comment>--url</comment> option prints the
-url along with the results for quickly navigating to the reservation web page.
+Check if North Rim Campground has available sites on February 2nd, 2022 for 3 nights:
 
+    $ <info>rgov check 2-2-2022 3 232489</>
+
+Check if North Rim and Spring Canyon campgrounds have available sites on March 20th, 2022 for 4 nights:
+
+    $ <info>rgov check 3-20-2022 4 232489 234064</>
 """
     
     def handle(self) -> int:

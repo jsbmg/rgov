@@ -20,29 +20,19 @@ class DaemonCommand(Command):
     name = "daemon"
     description = "Start a daemon that checks for availablity automatically"
 
-    help = """The <info>daemon</info> command automatically checks campground(s)
-availability on the dates of stay every 5 minutes as a background process. Like
-the check command, the daemon command defaults to the current date with a three
-nights stay. The following example checks for a three night stay starting on
-October 12, 2021 at Laguna:
+    help = """The <question>daemon</> command starts a Unix daemon that checks for campground availability every five minutes. If one or more campground(s) are found to have available sites, a Pushsafer notification is sent with a summary of which campground(s) are currently available.
 
-<info>rgov daemon 232279 -date 10-12-2021 -length 3</info>
+Note that a Pushsafer account and API key is required to use this command, and devices (e.g. a phone) must be configured for for it to work.
 
-Campground ids can be found using the <info>search</info> command.
+<options=bold>Examples:</>
 
-The <comment>command</comment> option runs a given shell command in the event
-one or more of the campgrounds checked are found to have available sites. This
-can be used, for example, to send an email with msmtp.
+Check if North Rim Campground has available sites on February 2nd, 2022 for 3 nights, and quit after four notifications have been sent:
 
-The <comment>--notifier</comment> option specifies a notification program to be
-used (e.g. herbe or notify-send) to send a system notification. The notifier
-assumes that the format of the notification program is <comment><notification
-program> "notification text"</comment>.
+    $ <info>rgov daemon --notify-limit 4 2-2-2022 3 232489</>
 
-Be default, the daemon exits if availability is found, to avoid excess
-notifications. This can be disabled with the <comment>--forever</comment>
-option.
+Check if North Rim and Spring Canyon campgrounds have available sites on March 20th, 2022 for five nights:
 
+    $ <info>rgov daemon 3-20-2022 5 232489 234064</>
 """
 
     arguments = [
