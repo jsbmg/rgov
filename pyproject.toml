@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rgov"
-version = "0.2.4"
+version = "0.5.0"
 description = "Check if campgrounds have availability on Recreation.gov"
 authors = ["Jordan Sweet <hello@jordandsweet.com>"]
 license = "GPL-3.0-only"
