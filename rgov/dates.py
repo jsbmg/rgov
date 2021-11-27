@@ -11,9 +11,11 @@ class Dates:
     def __validate_arrival_date(self, date_input):
         try:
             arrival_date = datetime.datetime.strptime(date_input, "%m-%d-%Y")
-            return arrival_date
         except ValueError:
             raise ValueError(f'"{date_input}" is not a valid date of the form mm-dd-yyyy')
+        if datetime.datetime.now() > arrival_date:
+            raise ValueError(f'"{date_input}" is not a future date.')
+        return arrival_date
 
     def __validate_length_of_stay(self, length_input):
         if length_input.isnumeric():
