@@ -27,8 +27,7 @@ In order to receive notifications, you will need to make an account with Pushsaf
 https://www.pushsafer.com/
 
 ## Quick Start
-
-The easiest way to run rgov is with the `run` command. Use it to build a list of campgrounds , enter your dates, and start checking for available sites:
+The easiest way to run rgov is with the `run` command. Use it to build a list of campgrounds, enter your dates of stay, and start checking for available sites:
 
 `$ rgov run` 
 

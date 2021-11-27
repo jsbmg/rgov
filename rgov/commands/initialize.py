@@ -24,22 +24,14 @@ class InitCommand(Command):
     name = "init"
     description = "Update the campground id search index"
 
-    help = """The <question>init</> command is for interactively setting Pushsafer API credentials and/or rebuilding the campground database, which is a csv file of campground names, ids, and optionally their corresponding descriptions. 
+    help = """The <question>init</> command is for rebuilding the campground database, which is a csv file of campground names, ids, and optionally their corresponding descriptions. Running this command is only necessary if there is a problem with the existing database or it needs to be updated.  
 
 <options=bold>Examples:</>
 
-Build the campground databse with descriptions (and optionally enter Pushsafer API credentials):
+Download and (re)build the campground databse:
 
-    $ <info>poetry run rgov init --with-descriptions</>
+    $ <info>poetry run rgov init</>
 """
-
-    options = [
-        option(
-            "with-descriptions",
-            "w",
-            "Whether to include descriptions in the search database",
-        )
-    ]
 
     def ensure_download_dir_exists(self):
         os.makedirs(locations.DOWNLOAD_FOLDER, exist_ok=True)
@@ -51,17 +43,13 @@ Build the campground databse with descriptions (and optionally enter Pushsafer A
         with zipfile.ZipFile(locations.DOWNLOAD_PATH, "r") as zip_ref:
             zip_ref.extractall(locations.DOWNLOAD_FOLDER)
 
-    def generate_index(self, descriptions):
+    def generate_index(self):
         """
         Reads from the recreation.gov facilities csv file
         and writes a new csv that includes only the attributes
         that are relevant to the program. This includes
-        campground names and ids and optionally, descriptions,
-        which provide for better search capabilities but take
-        more disk space (around 9mb vs ~130kb). Some data cleaning
-        is performed, such as removing html tags and fixing
-        capitalization.
-
+        campground names, ids, and descriptions. 
+        
         The relevant Recreation.gov facilities csv columns are:
         Column 0 = Facility ID
         Column 5 = Facility Name
@@ -72,7 +60,7 @@ Build the campground databse with descriptions (and optionally enter Pushsafer A
         The output csv is organized as:
         Column 0 = Facility ID
         Column 1 = Facility Name
-        Column 2 = Facility Description (if --with-descriptions)
+        Column 2 = Facility Description 
         """
         os.makedirs(locations.DATA_FOLDER, exist_ok=True)
         facilities_list = []
@@ -81,13 +69,9 @@ Build the campground databse with descriptions (and optionally enter Pushsafer A
             for row in reader:
                 # filter for reservable campgrounds with a non-empty name entry
                 if row[7] == "Campground" and row[19] == "true" and row[5]:
-                    if descriptions is True:
-                        facilities_list.append(
-                            [row[0], row[5].lower(), cleanhtml(row[6]).lower()]
-         
-                        )
-                    else:
-                        facilities_list.append([row[0], row[5].lower()])
+                    facilities_list.append(
+                        [row[0], row[5].lower(), cleanhtml(row[6]).lower()]
+                    )
         # sort the entries alphabetically by name so search results are
         # also alphabetical
         facilities_list.sort(key=lambda x: x[1])
@@ -104,7 +88,6 @@ Build the campground databse with descriptions (and optionally enter Pushsafer A
         shutil.rmtree(locations.DOWNLOAD_FOLDER)
 
     def handle(self) -> int:
-        descriptions = self.option("with-descriptions")
         steps = [
             ("Checking download directory", self.ensure_download_dir_exists),
             (f"Downloading data from {self._DOWNLOAD_URL}", self.request_ridb_data),
@@ -122,10 +105,7 @@ Build the campground databse with descriptions (and optionally enter Pushsafer A
             format = f"<question>{step[0]}...</question>"
             self.line("")
             self.write(format)
-            if step[0] == "Generating index":
-                step[1](descriptions)  # needs argument
-            else:
-                step[1]()
+            step[1]()
             self.overwrite(format + f"<comment>done</comment>.")
 
         self.line("")
