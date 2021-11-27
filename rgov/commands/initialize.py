@@ -28,7 +28,7 @@ class InitCommand(Command):
     name = "init"
     description = "Update the campground id search index"
 
-    help = """The <question>init</> command is for rebuilding the campground database, which is a csv file of campground names, ids, and optionally their corresponding descriptions. Running this command is only necessary if there is a problem with the existing database or it needs to be updated.  
+    help = """The <question>init</> command is for rebuilding the campground database, which stores the campground names, ids, and their corresponding descriptions. Running this command is only necessary if there is a problem with the existing database or it needs to be updated.  
 
 <options=bold>Examples:</>
 
