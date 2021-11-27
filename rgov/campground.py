@@ -119,7 +119,7 @@ class Campground:
 
             elif num_available_sites > 12:
                 col_1 = f"<question>{self.name}</question>:"
-                col_2 = f"<fg=green>{num_sites_available}</> sites available"
+                col_2 = f"<fg=green>{num_available_sites}</> sites available"
 
             else:
                 col_1 = f"<question>{self.name}</question>:"
