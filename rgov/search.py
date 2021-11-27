@@ -4,7 +4,9 @@ from typing import Generator
 
 from rgov import locations
 
-def search(search_terms: str, target_column: int) -> Generator[tuple[str, str], None, None]:
+def search(search_terms: list, target_column: int) -> Generator[tuple[str, str], None, None]:
+    if not isinstance(search_terms, list):
+         raise ValueError("arg: search_terms not a list")
     search_terms_lowercase = [term.lower() for term in search_terms]
     num_search_terms = len(search_terms)
     try:
