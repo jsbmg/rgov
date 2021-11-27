@@ -1,4 +1,3 @@
-import csv
 import datetime
 import time
 
@@ -21,12 +20,12 @@ class RunCommand(Command):
         search_input_list = search_input.split(" ")
 
         if search_input_list[-1] == "-d":
-            target_column = 2
+            descriptions = True 
             del search_input_list[-1]
         else:
-            target_column = 1
+            descriptions = False 
 
-        search_results = search(search_input_list, target_column)
+        search_results = search(search_input_list, descriptions)
         search_results = {name: num for name, num in search_results}
 
         if search_results:

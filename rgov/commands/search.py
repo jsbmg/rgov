@@ -33,13 +33,11 @@ Search for the campground "North Rim Campground":
         search_terms = self.argument("terms")
         
         if self.option("descriptions"):
-            # target_column determines which column of the csv is
-            # searched. '2' is the campsite descriptions and '1' is the
-            # campsite names.
-            target_column = 2 
+            descriptions = True
         else:
-            target_column = 1
+            descriptions = False 
             
-        search_results = search.search(search_terms, target_column)
+        search_results = search.search(search_terms, descriptions)
+
         for name, id_num in search_results:
-            self.line(f"{name} [<question>{id_num}</>]") 
+            self.line(f"<info>{name}</> [<question>{id_num}</>]") 

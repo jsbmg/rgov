@@ -14,6 +14,7 @@ FACILITIES_CSV_PATH = os.path.join(DOWNLOAD_FOLDER, "Facilities_API_v1.csv")
 
 DATA_FOLDER = os.path.join(PROJECT_ROOT, "data")
 INDEX_PATH = os.path.join(DATA_FOLDER, "campgrounds_index.csv")
+FACILITIES_DB = os.path.join(DATA_FOLDER, "rgov.db")
 
 CONFIG_DIR = os.getenv("XDG_CONFIG_HOME", os.path.join(Path.home(), ".config"))
 AUTH_FILE = os.path.join(CONFIG_DIR, "rgov", "auth.txt") 

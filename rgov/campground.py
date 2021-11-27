@@ -1,5 +1,6 @@
-import csv
+import contextlib
 import json
+import sqlite3
 
 from urllib.error import HTTPError
 from urllib.parse import urlencode
@@ -58,13 +59,15 @@ class Campground:
             requests = self._request(request_dates, stay_dates)   
         except (HTTPError, KeyError):
             raise
+
         available_sites = []
         last_day = stay_dates[-1]
+
         for request in requests:
             for site in request:
                 for date in stay_dates:
                     if date in site["availabilities"]:
-                        if site["availabilities"][date] not in "Available":
+                        if site["availabilities"][date] != "Available":
                             break
                         else:
                             if date == last_day:
@@ -76,17 +79,19 @@ class Campground:
         if not self._name == None:
             return self._name
         else:
+            sql_statement = """SELECT name FROM campgrounds WHERE id = (?)"""
             try:
-                with open(locations.INDEX_PATH, 'r') as f:
-                    reader = csv.reader(f)
-                    for row in reader:
-                        if self.id_num in row[0]:
-                            self._name = row[1].title()
-                            return self._name 
-            except FileNotFoundError:
-                error_msg = "Campground index missing. Try running the 'init' command to create it."
-                raise FileNotFoundError(error_msg)
-            raise IndexError(f'"{self.id_num}" is not a valid campground id.')
+                with contextlib.closing(sqlite3.connect(locations.FACILITIES_DB)) as con, con, \
+                        contextlib.closing(con.cursor()) as cur:
+                        cur.execute(sql_statement, (self.id_num,))
+                        self._name = cur.fetchone()[0].title()
+                        if not self._name:
+                            raise ValueError(f"{self.id_num} is not a valid id.")
+                        return self._name
+            except sqlite.OperationalError:
+                raise sqlite3.OperationalError(("Something went wrong "
+                                                "with the database: "
+                                                "Try running `rgov init`."))
 
     @property
     def available(self):
