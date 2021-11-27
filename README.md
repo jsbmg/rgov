@@ -34,4 +34,4 @@ The easiest way to run rgov is with the `run` command. Use it to build a list of
 
 The `search`, `check`, and `daemon` commands provide the same functionality as above but non-interactively.
 
-Run `$ rgov` to see a list of all commands, and `rgov help <command>` to see more information about each command. 
+Run `$ rgov` to see a list of all commands, and `rgov help <command>` to see more information about each one. 
