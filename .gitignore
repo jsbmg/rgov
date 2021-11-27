@@ -1,7 +1,6 @@
 __pycache__
 .envrc
 /dist/*
-/data
 poetry.lock
 rgov.egg-info/*
 setup.py
