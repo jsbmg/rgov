@@ -28,7 +28,7 @@ https://www.pushsafer.com/
 
 ## Quick Start
 
-The easiest way to run rgov is with the `run` command. Use it to build a list of campgrounds , enter your dates, and check for them (and optionally check for them continuously):
+The easiest way to run rgov is with the `run` command. Use it to build a list of campgrounds , enter your dates, and start checking for available sites:
 
 `$ rgov run` 
 
