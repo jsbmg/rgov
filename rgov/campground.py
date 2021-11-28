@@ -111,7 +111,7 @@ class Campground:
         len_name = len(self.name)
 
         if not width:
-            width = len(self.name)
+            width = len_name
 
         width += len(col_1) - len_name  
 
