@@ -1,11 +1,11 @@
 [tool.poetry]
 name = "rgov"
-version = "0.6.0"
+version = "0.6.4"
 description = "Check if campgrounds have availability on Recreation.gov"
 authors = ["Jordan Sweet <hello@jordandsweet.com>"]
 license = "GPL-3.0-only"
 readme = "README.md"
-
+include = ["data/rgov.db"]
 [tool.poetry.dependencies]
 python = "^3.6"
 cleo = "^0.8.1"
