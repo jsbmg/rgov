@@ -1,3 +1,4 @@
+import contextlib
 import csv
 import os
 import urllib.request
@@ -64,16 +65,17 @@ Download and (re)build the campground databse:
         # sort the entries alphabetically by name so search results are
         # also alphabetical
         facilities_list.sort(key=lambda x: x[1])
+
         if os.path.exists(os.path.join(locations.DATA_FOLDER, "rgov.db")):
             os.remove(os.path.join(locations.DATA_FOLDER, "rgov.db"))
-        con = sqlite3.connect(os.path.join(locations.DATA_FOLDER, "rgov.db"))
-        cur = con.cursor()
-        cur.execute('''CREATE TABLE campgrounds
-                       (id, name, description)''')
-        sql_statement = 'INSERT INTO campgrounds VALUES (?, ?, ?)'
-        cur.executemany(sql_statement, facilities_list)
-        con.commit()
-        con.close()
+
+        with contextlib.closing(sqlite3.connect(locations.FACILITIES_DB)) as con, con, \
+            contextlib.closing(con.cursor()) as cur:
+            cur.execute('''CREATE TABLE campgrounds
+                           (id, name, description)''')
+            sql_statement = 'INSERT INTO campgrounds VALUES (?, ?, ?)'
+            cur.executemany(sql_statement, facilities_list)
+            con.commit()
 
     def delete_temp_files(self):
         """
