@@ -65,13 +65,18 @@ class Campground:
 
         for request in requests:
             for site in request:
+                counter = 0
                 for date in stay_dates:
                     if date in site["availabilities"]:
                         if site["availabilities"][date] != "Available":
                             break
                         else:
-                            if date == last_day:
+                            counter += 1
+                            if counter == 2:
                                 available_sites.append(site["site"])
+                            continue
+                    break 
+
         self._available = sorted(available_sites)
 
     @property
