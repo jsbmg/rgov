@@ -54,9 +54,9 @@ class RunCommand(Command):
             return False 
 
     def print_selections(self, campgrounds):
-        self.line("\n<info>Currently selected:</>")
+        self.line("\n<fg=yellow>Currently selected</>:")
         for campground in campgrounds:
-             self.line(f"* <fg=yellow>{campground}</>")
+             self.line(f"<info>{campground}</>")
 
     name = "run"
     description = "Run interactively"
