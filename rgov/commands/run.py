@@ -136,7 +136,7 @@ When searching for campgrounds interactively, note that a "-d" appended to the s
         dates = Dates(date_input, length_input)
         unavailable = []
 
-        self.line("<fg=green>Availability</>:")
+        self.line("<fg=yellow>Availability</>:")
 
         for campground in campgrounds.values():
             try:
