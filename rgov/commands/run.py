@@ -143,6 +143,7 @@ When searching for campgrounds interactively, note that a "-d" appended to the s
                 campground.get_available(dates.request_dates, dates.stay_dates)
 
             except (HTTPError, IndexError) as error:
+                unavailable.append(campground.id_num)
                 self.line(campground.gen_cli_text(column_width, error)) 
                 time.sleep(2)
                 continue
