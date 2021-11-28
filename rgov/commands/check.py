@@ -61,7 +61,7 @@ Check if North Rim and Spring Canyon campgrounds have available sites on March 2
                 campground.get_available(dates.request_dates, dates.stay_dates)
 
             except (HTTPError, IndexError) as error:
-                self.error(campground.gen_cli_text(column_width, error))
+                self.line(campground.gen_cli_text(column_width, error))
                 continue
 
             self.line(campground.gen_cli_text(column_width))
