@@ -2,6 +2,7 @@ import contextlib
 import json
 import sqlite3
 
+from collections import defaultdict
 from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -51,7 +52,7 @@ class Campground:
                 campsite_data = data_loaded["campsites"]
             except KeyError:
                 raise
-            requests.append(campsite_data.values())
+            requests.append(campsite_data)
         return requests
 
     def get_available(self, request_dates: list, stay_dates: list):
@@ -60,24 +61,15 @@ class Campground:
         except (HTTPError, KeyError):
             raise
 
-        available_sites = []
-        last_day = stay_dates[-1]
-
+        d = defaultdict(int) 
         for request in requests:
-            for site in request:
-                counter = 0
+            for site in request.values():
                 for date in stay_dates:
                     if date in site["availabilities"]:
-                        if site["availabilities"][date] != "Available":
-                            break
-                        else:
-                            counter += 1
-                            if counter == 2:
-                                available_sites.append(site["site"])
-                            continue
-                    break 
+                        if site["availabilities"][date] == "Available":
+                            d[site["site"]] += 1
 
-        self._available = sorted(available_sites)
+        self._available = [k for k, v in d.items() if v == len(stay_dates)] 
 
     @property
     def name(self):
@@ -115,12 +107,15 @@ class Campground:
             return self._url
 
     def gen_cli_text(self, width=None, error=None):
+        col_1 = f"<info>{self.name}</>:"
+        len_name = len(self.name)
+
         if not width:
             width = len(self.name)
-        width += 22
+
+        width += len(col_1) - len_name  
 
         if error:
-            col_1 = f"<question>{self.name}</question>"
             col_2 = f"<error>{error}</>"
         else:
             try:
@@ -130,18 +125,13 @@ class Campground:
 
             if 1 <= num_available_sites <= 12:
                 sorted_sites = ", ".join(self.available)
-                col_1 = f"<question>{self.name}</question>:"
-                col_2 = f"<fg=yellow>{sorted_sites}</> available"
+                col_2 = f"<fg=cyan>{sorted_sites}</> available"
 
             elif num_available_sites > 12:
-                col_1 = f"<question>{self.name}</question>:"
-                col_2 = f"<fg=green>{num_available_sites}</> sites available"
+                col_2 = f"<fg=magenta>{num_available_sites}</> sites available"
 
             else:
-                col_1 = f"<question>{self.name}</question>:"
                 col_2 = f"<fg=red>full</>"
 
         self._cli_text = f"{col_1:{width}} {col_2}" 
         return self._cli_text 
-
-
