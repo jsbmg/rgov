@@ -13,7 +13,7 @@ class Dates:
             arrival_date = datetime.datetime.strptime(date_input, "%m-%d-%Y")
         except ValueError:
             raise ValueError(f'"{date_input}" is not a valid date of the form mm-dd-yyyy')
-        if datetime.datetime.now() > arrival_date:
+        if datetime.datetime.today().date() > arrival_date.date():
             raise ValueError(f'"{date_input}" is not a future date.')
         return arrival_date
 
