@@ -1,10 +1,10 @@
 import datetime
 
-class Dates:
 
+class Dates:
     def __init__(self, arrival_date, length_of_stay):
         self._arrival_date = self.__validate_arrival_date(arrival_date)
-        self.length_of_stay = self.__validate_length_of_stay(length_of_stay) 
+        self.length_of_stay = self.__validate_length_of_stay(length_of_stay)
         self._request_dates = None
         self._stay_dates = None
 
@@ -12,7 +12,9 @@ class Dates:
         try:
             arrival_date = datetime.datetime.strptime(date_input, "%m-%d-%Y")
         except ValueError:
-            raise ValueError(f'"{date_input}" is not a valid date of the form mm-dd-yyyy')
+            raise ValueError(
+                f'"{date_input}" is not a valid date of the form mm-dd-yyyy'
+            )
         if datetime.datetime.today().date() > arrival_date.date():
             raise ValueError(f'"{date_input}" is not a future date.')
         return arrival_date
@@ -37,7 +39,7 @@ class Dates:
                 request_dates.append(request_date)
             self._request_dates = request_dates
             return self._request_dates
-    
+
     @property
     def stay_dates(self):
         if not self._stay_dates == None:

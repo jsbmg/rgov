@@ -1,14 +1,12 @@
 import contextlib
 import json
 import sqlite3
-
 from collections import defaultdict
 from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 from fake_useragent import UserAgent
-
 from rgov import locations
 
 
@@ -17,18 +15,20 @@ class AvailabilityNotFoundError(Exception):
         if arg:
             self.message = arg
         else:
-            self.message = ("Try initializing this attribute"  
-                            "with the get_availability() method first.")
+            self.message = (
+                "Try initializing this attribute"
+                "with the get_availability() method first."
+            )
+
     def __str__(self):
         return self.message
 
 
 class Campground:
-
-    def __init__(self, id_num): 
+    def __init__(self, id_num):
         self.id_num = id_num
-        self._name = None 
-        self._available = None 
+        self._name = None
+        self._available = None
         self._url = None
         self._cli_text = None
 
@@ -57,11 +57,11 @@ class Campground:
 
     def get_available(self, request_dates: list, stay_dates: list):
         try:
-            requests = self._request(request_dates, stay_dates)   
+            requests = self._request(request_dates, stay_dates)
         except (HTTPError, KeyError):
             raise
 
-        d = defaultdict(int) 
+        d = defaultdict(int)
         for request in requests:
             for site in request.values():
                 for date in stay_dates:
@@ -69,7 +69,7 @@ class Campground:
                         if site["availabilities"][date] == "Available":
                             d[site["site"]] += 1
 
-        self._available = [k for k, v in d.items() if v == len(stay_dates)] 
+        self._available = [k for k, v in d.items() if v == len(stay_dates)]
 
     @property
     def name(self):
@@ -78,17 +78,22 @@ class Campground:
         else:
             sql_statement = """SELECT name FROM campgrounds WHERE id = (?)"""
             try:
-                with contextlib.closing(sqlite3.connect(locations.FACILITIES_DB)) as con, con, \
-                        contextlib.closing(con.cursor()) as cur:
-                        cur.execute(sql_statement, (self.id_num,))
-                        self._name = cur.fetchone()[0].title()
-                        if not self._name:
-                            raise ValueError(f"{self.id_num} is not a valid id.")
-                        return self._name
+                with contextlib.closing(
+                    sqlite3.connect(locations.FACILITIES_DB)
+                ) as con, con, contextlib.closing(con.cursor()) as cur:
+                    cur.execute(sql_statement, (self.id_num,))
+                    self._name = cur.fetchone()[0].title()
+                    if not self._name:
+                        raise ValueError(f"{self.id_num} is not a valid id.")
+                    return self._name
             except sqlite.OperationalError:
-                raise sqlite3.OperationalError(("Something went wrong "
-                                                "with the database: "
-                                                "Try running `rgov init`."))
+                raise sqlite3.OperationalError(
+                    (
+                        "Something went wrong "
+                        "with the database: "
+                        "Try running `rgov init`."
+                    )
+                )
 
     @property
     def available(self):
@@ -113,7 +118,7 @@ class Campground:
         if not width:
             width = len_name
 
-        width += len(col_1) - len_name  
+        width += len(col_1) - len_name
 
         if error:
             col_2 = f"<error>{error}</>"
@@ -133,5 +138,5 @@ class Campground:
             else:
                 col_2 = f"<fg=red>full</>"
 
-        self._cli_text = f"{col_1:{width}} {col_2}" 
-        return self._cli_text 
+        self._cli_text = f"{col_1:{width}} {col_2}"
+        return self._cli_text

@@ -5,12 +5,9 @@ import os
 import time
 
 import daemon
-
 from cleo import Command
-from cleo.helpers import option, argument
-
-from rgov import locations
-from rgov import pushsafer
+from cleo.helpers import argument, option
+from rgov import locations, pushsafer
 from rgov.campground import Campground
 from rgov.dates import Dates
 
@@ -62,12 +59,12 @@ Check if North Rim and Spring Canyon campgrounds have available sites on March 2
         id_input = self.argument("id")
         date_input = self.argument("date")
         length_input = self.argument("length")
-            
+
         if self.option("notify-limit"):
             notify_limit = int(self.option("notify-limit"))
         else:
             notify_limit = 3
-            
+
         dates = Dates(date_input, length_input)
         campgrounds = [Campground(id) for id in id_input]
 
@@ -88,18 +85,20 @@ Check if North Rim and Spring Canyon campgrounds have available sites on March 2
 
         self.line("<fg=magenta>Starting to check.</fg=magenta>")
         with daemon.DaemonContext():
-            logging.basicConfig(filename=locations.LOG_FILE,
-                                filemode='a',
-                                format='[%(asctime)s] %(message)s',
-                                datefmt='%Y/%d/%m %H:%M:%S',
-                                level=logging.INFO)
-            logging.info('starting to search')
-            
+            logging.basicConfig(
+                filename=locations.LOG_FILE,
+                filemode="a",
+                format="[%(asctime)s] %(message)s",
+                datefmt="%Y/%d/%m %H:%M:%S",
+                level=logging.INFO,
+            )
+            logging.info("starting to search")
+
             notification_counter = 0
-            
+
             while True:
-                logging.info('------------checking------------')
-                available = {} 
+                logging.info("------------checking------------")
+                available = {}
                 for campground in campgrounds:
                     try:
                         campground.get_available(dates.request_dates, dates.stay_dates)
@@ -108,29 +107,31 @@ Check if North Rim and Spring Canyon campgrounds have available sites on March 2
                         logging.error(error)
                         time.sleep(10)
                         continue
-                        
+
                     if len(campground.available) > 0:
-                        logging.info(f'{campground.name} - found available site(s)')
+                        logging.info(f"{campground.name} - found available site(s)")
                         available[campground.name] = campground.available
                     else:
-                        logging.info(f'{campground.name} - no available site(s)')
+                        logging.info(f"{campground.name} - no available site(s)")
 
                     if campground != campgrounds[-1]:
                         time.sleep(1)
 
                 if available:
                     message = pushsafer.gen_notifier_text(available)
-                    pushsafer_status = pushsafer.notify(ps_api_key, 'a', message)
-                    if pushsafer_status['status'] == 0:
+                    pushsafer_status = pushsafer.notify(ps_api_key, "a", message)
+                    if pushsafer_status["status"] == 0:
                         logging.error(f"Pushsafer: {pushsafer_status}")
                     else:
                         logging.info(f"Pushsafer: {pushsafer_status}")
                     notification_counter += 1
                 if notification_counter == notify_limit:
-                    reached_notify_limit = ("notification limit reached "
-                                            f"[{notification_counter}/" 
-                                            f"{notify_limit}] - exiting")
+                    reached_notify_limit = (
+                        "notification limit reached "
+                        f"[{notification_counter}/"
+                        f"{notify_limit}] - exiting"
+                    )
                     logging.info(reached_notify_limit)
                     return 0
-                                           
+
                 time.sleep(300)  # wait 5 minutes before rechecking

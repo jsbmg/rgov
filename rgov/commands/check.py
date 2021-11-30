@@ -1,33 +1,26 @@
 import datetime
-
 import time
-
 from urllib.error import HTTPError
 
 from cleo import Command
 from cleo.helpers import argument, option
-
 from rgov import pushsafer
-from rgov.dates import Dates
 from rgov.campground import Campground
+from rgov.dates import Dates
+
 
 class CheckCommand(Command):
     name = "check"
     description = "Check campground(s) for availability"
     arguments = [
-        argument("date",
-                 "The date if arrival (mm-dd-yyyy)"),
-        argument("length",
-                 "Length of stay in nights"),
-        argument("id",
-                 "The campground id(s) to check",
-                 multiple=True),
+        argument("date", "The date if arrival (mm-dd-yyyy)"),
+        argument("length", "Length of stay in nights"),
+        argument("id", "The campground id(s) to check", multiple=True),
     ]
     options = [
         option("cron-mode", "c", "Run once and notify if availability found"),
         option("url", "u", "Print the campground url(s) with the output"),
     ]
-
 
     help = """The <question>check</> command prints out a summary of campsite availability for the the given campground(s) over the specified date range. 
 
@@ -45,7 +38,7 @@ Check if North Rim and Spring Canyon campgrounds have available sites on March 2
 
     $ <info>rgov check 3-20-2022 4 232489 234064</>
 """
-    
+
     def handle(self) -> int:
         ids_input = self.argument("id")
         date_input = self.argument("date")
@@ -65,9 +58,8 @@ Check if North Rim and Spring Canyon campgrounds have available sites on March 2
                 continue
 
             self.line(campground.gen_cli_text(column_width))
-                
+
         if self.option("cron-mode"):
-            self.line("Not yet implemented.")                
+            self.line("Not yet implemented.")
 
-        return 0       
-
+        return 0
