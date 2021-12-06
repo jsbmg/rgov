@@ -24,9 +24,6 @@ def write_credentials(email, key, passcmd=False):
     ) as file:
         file.truncate(0)
         file.write(f"{email}\n")
-        # if passcmd:
-        #    file.write(f"passcmd: {key}")
-        # else:
         file.write(f"{key}")
 
 
