@@ -9,10 +9,12 @@ SAMPLE_CAMPGROUND = Campground("232279")
 
 
 def main():
-    requests = campground._request(dates.request_dates, dates.stay_dates)
+    requests = SAMPLE_CAMPGROUND._request(
+        SAMPLE_DATES.request_dates, SAMPLE_DATES.stay_dates
+    )
 
     with open(locations.EXAMPLE_DATA, "w") as f:
-        f.write(json.dumps(requests))
+        f.write(json.dumps(requests, indent=4))
 
 
 if __name__ == "__main__":
