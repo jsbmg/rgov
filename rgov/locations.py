@@ -18,3 +18,5 @@ FACILITIES_DB = os.path.join(DATA_FOLDER, "rgov.db")
 CONFIG_DIR = os.getenv("XDG_CONFIG_HOME", os.path.join(Path.home(), ".config"))
 AUTH_FILE = os.path.join(CONFIG_DIR, "rgov", "auth.txt")
 LOG_FILE = os.path.join(Path.home(), ".rgov.log")
+
+EXAMPLE_DATA = os.path.join(DATA_FOLDER, "example.json")
