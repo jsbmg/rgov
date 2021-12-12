@@ -55,11 +55,17 @@ class Campground:
             requests.append(campsite_data)
         return requests
 
-    def get_available(self, request_dates: list, stay_dates: list):
-        try:
-            requests = self._request(request_dates, stay_dates)
-        except (HTTPError, KeyError):
-            raise
+    def get_available(self, request_dates: list, stay_dates: list, test=False):
+        if test:
+            requests = []
+            with open(locations.EXAMPLE_DATA, "r") as f:
+                f = f.read()
+                requests = json.loads(f)
+        else:
+            try:
+                requests = self._request(request_dates, stay_dates)
+            except (HTTPError, KeyError):
+                raise
 
         d = defaultdict(int)
         for request in requests:
