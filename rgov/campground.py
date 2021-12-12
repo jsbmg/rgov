@@ -16,7 +16,7 @@ class AvailabilityNotFoundError(Exception):
             self.message = arg
         else:
             self.message = (
-                "Try initializing this attribute"
+                "Try initializing this attribute "
                 "with the get_availability() method first."
             )
 
