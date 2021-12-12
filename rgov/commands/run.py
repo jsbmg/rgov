@@ -112,7 +112,7 @@ When searching for campgrounds interactively, note that a "-d" appended to the s
 
         def year_validator(num):
             this_year = datetime.datetime.today().year
-            if int(num) not in range(this_year, this_year + 1):
+            if int(num) not in range(this_year, this_year + 2):
                 raise Exception("Not a valid four digit year.")
             return num
 
