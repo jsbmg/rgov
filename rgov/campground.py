@@ -37,25 +37,32 @@ class Campground:
         requests = []
         for date in request_dates:
             url = f"{endpoint}/{self.id_num}/month?"
-            params = {"start_date": date}
-            query_string = urlencode(params)
-            url = url + query_string
-            request = Request(url)
-            request.add_header("User-Agent", UserAgent().random)
+            date_query = urlencode("start_date": date})
+            url = url + date_query
+            req = Request(url)
+            req.add_header("User-Agent", UserAgent().random)
+
             try:
-                data = urlopen(request)
+                data = urlopen(req)
             except HTTPError:
                 raise
-            data = data.read()
-            data_loaded = json.loads(data)
+
+            data = json.loads(data.read())
+
+            # This fails if the campground id is invalid.
             try:
-                campsite_data = data_loaded["campsites"]
+                campsites = data["campsites"]
             except KeyError:
                 raise
-            requests.append(campsite_data)
+
+            requests.append(campsites)
+
         return requests
 
     def get_available(self, request_dates: list, stay_dates: list, test=False):
+        """Finds available sites, if any, at the campground. If test is
+        True, then loads campground data from the test file instead of
+        from a live request."""
         if test:
             requests = []
             with open(locations.EXAMPLE_DATA, "r") as f:

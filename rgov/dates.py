@@ -3,25 +3,29 @@ import datetime
 
 class Dates:
     def __init__(self, arrival_date, length_of_stay):
-        self._arrival_date = self.__validate_arrival_date(arrival_date)
-        self.length_of_stay = self.__validate_length_of_stay(length_of_stay)
+        self._arrival_date = self.__validate_date(arrival_date)
+        self.length_of_stay = self.__validate_length(length_of_stay)
         self._request_dates = None
         self._stay_dates = None
 
-    def __validate_arrival_date(self, date_input):
+    def __validate_date(self, date):
+        """Validates the given date and returns it as a datetime
+        object."""
         try:
-            arrival_date = datetime.datetime.strptime(date_input, "%m-%d-%Y")
+            dt = datetime.datetime.strptime(date, "%m-%d-%Y")
         except ValueError:
             raise ValueError(
-                f'"{date_input}" is not a valid date of the form mm-dd-yyyy'
+                f'"{date}" is not a valid date of the form mm-dd-yyyy'
             )
-        if datetime.datetime.today().date() > arrival_date.date():
-            raise ValueError(f'"{date_input}" is not a future date.')
-        return arrival_date
+        if datetime.datetime.today().date() > dt.date():
+            raise ValueError(f'"{date}" is not a future date.')
+        return dt
 
-    def __validate_length_of_stay(self, length_input):
-        if length_input.isnumeric():
-            return int(length_input)
+    def __validate_length(self, length):
+        """Validates the given length of stay and returns it as an
+        integer."""
+        if length.isnumeric():
+            return int(length)
         else:
             raise ValueError('"{length_input}" is not an integer.')
 
@@ -30,14 +34,15 @@ class Dates:
         if not self._request_dates == None:
             return self._request_dates
         else:
-            request_dates = []
-            first_day = self._arrival_date.replace(day=1)
-            last_day = self._arrival_date + datetime.timedelta(days=self.length_of_stay)
-            for month in range(first_day.month, (last_day.month + 1)):
-                request_date = first_day.replace(month=month)
-                request_date = request_date.strftime("%Y-%m-%dT00:00:00.000Z")
-                request_dates.append(request_date)
-            self._request_dates = request_dates
+            dates = []
+            arrive = self._arrival_date.replace(day=1)
+            time_delta = datetime.timedelta(days=self.length_of_stay)
+            depart = self._arrival_date + time_delta
+            for month in range(arrive.month, (depart.month + 1)):
+                date = arrive.replace(month=month)
+                date = date.strftime("%Y-%m-%dT00:00:00.000Z")
+                dates.append(date)
+            self._request_dates = dates
             return self._request_dates
 
     @property

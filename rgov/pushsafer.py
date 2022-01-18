@@ -9,12 +9,14 @@ from rgov import locations
 
 
 def input_credentials() -> tuple[str, str]:
-    username = input("Enter username/email for Pushsafer: ")
+    """Prompt for Pushsafer API credentials."""
+    user = input("Enter username/email for Pushsafer: ")
     key = getpass.getpass("Enter API key for Pushsafer: ")
-    return username, key
+    return user, key
 
 
 def write_credentials(email, key, passcmd=False):
+    """ Write Pushsafer credentials to disk with 600 permissions."""
     os.makedirs(os.path.join(locations.CONFIG_DIR, "rgov"), exist_ok=True)
     os.umask(0)
     if passcmd:
@@ -28,43 +30,45 @@ def write_credentials(email, key, passcmd=False):
 
 
 def read_credentials():
+    """Read stored Pushsafer credentials from disk."""
     with open(locations.AUTH_FILE, "r") as file:
-        lines = file.readlines()
-        lines = [line.strip() for line in lines]
-        username = lines[0]
-        key = lines[1]
-        return username, key
+        content = file.readlines()
+        content = [line.strip() for line in content]
+        user = content[0]
+        key = content[1]
+        return user, key
 
 
-def validate_key(username: str, key: str) -> bool:
+def validate_key(user: str, key: str) -> bool:
+    """Return whether the Pushsafer credentials are valid or not."""
     url = "https://www.pushsafer.com/api-k"
-    post_fields = {"u": username, "k": key}
-    request = Request(url, urlencode(post_fields).encode())
-    status = json.loads(urlopen(request).read().decode())
+    fields = {"u": user, "k": key}
+    req = Request(url, urlencode(fields).encode())
+    status = json.loads(urlopen(req).read().decode())
     if status["status"] == 1:
         return True
     else:
         return False
 
 
-def gen_notifier_text(campground_results: dict) -> str:
-    message = ""
-    for name, available in campground_results.items():
-        num_sites = len(available)
-        available_str = ", ".join(available)
-        if 0 < num_sites < 10:
-            message += f"{name}: site(s) {available_str} available!\n"
-        elif num_sites > 10:
-            message += f"{name}: {num_sites} sites available!\n"
-    return message
+def gen_notifier_text(cg_availability: dict) -> str:
+    msg = ""
+    for name, sites in cg_availability.items():
+        available = ", ".join(sites)
+        if 0 < n_sites < 10:
+            msg += f"{name}: site(s) {available} available!\n"
+        elif n_sites > 10:
+            n_sites = len(sites)
+            msg += f"{name}: {n_sites} sites available!\n"
+    return msg
 
 
-def notify(key: str, device: str, message: str, url=None) -> dict:
+def notify(key: str, device: str, msg: str, url=None) -> dict:
     endpoint = "https://www.pushsafer.com/api"
     post_fields = {
         "d": device,
         "t": "Campsite Availability Update",
-        "m": message,
+        "m": msg,
         "s": 11,
         "v": 3,
         "i": 33,
@@ -75,6 +79,6 @@ def notify(key: str, device: str, message: str, url=None) -> dict:
         post_fields["u"] = url
         post_fields["ut"] = "Campsite Page"
 
-    request = Request(endpoint, urlencode(post_fields).encode())
-    status = json.loads(urlopen(request).read().decode())
+    req = Request(endpoint, urlencode(post_fields).encode())
+    status = json.loads(urlopen(req).read().decode())
     return status
