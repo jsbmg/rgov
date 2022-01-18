@@ -3,54 +3,62 @@ import time
 from urllib.error import HTTPError
 
 from cleo import Command
-from cleo.helpers import argument, option
 from rgov.campground import Campground
 from rgov.dates import Dates
 from rgov.search import search
 
 
 class RunCommand(Command):
-    def add_campgrounds(self):
-        campgrounds = {}
-        search_input = self.ask("Search for campgrounds:")
-        if not search_input:
-            return {}
-        search_input_list = search_input.split(" ")
+    def add(self):
+        """Interactive prompt to search for and select campgrounds.
+        Returns a dictionary of campgrounds, empty if no selections made.
+        """
+        parks = {}
+        input = self.ask("Search for campgrounds:")
+        if not input:
+            return parks
 
-        if search_input_list[-1] == "-d":
+        # If the last search term is '-d', search for the terms
+        # in the campground descriptions
+        words = input.split(" ")
+        if words[-1] == "-d":
             descriptions = True
-            del search_input_list[-1]
+            del words[-1]
         else:
             descriptions = False
 
-        search_results = search(search_input_list, descriptions)
-        search_results = {name: num for name, num in search_results}
+        # List of matching campgrounds
+        results = {name: num for name, num in search(words,descriptions)}
 
-        if search_results:
-            search_results["(none of the above)"] = None
-            search_input = self.choice(
-                "Select campground(s)", list(search_results.keys()), multiple=True
+        if results:
+            # Select campgrounds from the results list
+            results["(none of the above)"] = ""
+            input = self.choice(
+                "Select campground(s)",
+                list(results.keys()),
+                multiple=True
             )
-            for campground in search_input:
-                if campground == "(none of the above)":
+            for cg in input:
+                if cg == "(none of the above)":
                     pass
                 else:
-                    id_num = search_results[campground]
-                    campgrounds[campground] = Campground(id_num)
+                    # Add valid selection
+                    parks[cg] = Campground(results[cg])
+
         else:
-            no_results_msg = f"No results for {search_input}. " 'Try appending "-d".'
-            self.line(no_results_msg)
+            msg = f"No results for {input}. " 'Try appending "-d".'
+            self.line(msg)
 
-        return campgrounds
+        return parks
 
-    def selections_empty(self, campgrounds: dict):
+    def none_selected(self, campgrounds: dict):
         if not campgrounds:
             self.line("Nothing to do.")
             return True
         else:
             return False
 
-    def print_selections(self, campgrounds):
+    def display_selected(self, campgrounds):
         self.line("\n<fg=yellow>Currently selected</>:")
         for campground in campgrounds:
             self.line(f"<info>{campground}</>")
@@ -58,47 +66,48 @@ class RunCommand(Command):
     name = "run"
     description = "Run interactively"
 
-    help = """The <question>run</> command is an interactive alternative to the <question>search</>, <question>check</>, and <question>daemon</> commands. 
+    help = """The <question>run</> command is an interactive alternative to the <question>search</>, <question>check</>, and <question>daemon</> commands.
 
-Searching for campgrounds and setting the dates are done via prompt. If any or all of the selected campgrounds are unavailable, a confirmation prompt will ask if the <question>daemon</> should be started, which will check for availability every five minutes and send a notification via Pushsafer if availability is found (a Pushsafer account an API key is required for this).  
+Searching for campgrounds and setting the dates are done via prompt. If any or all of the selected campgrounds are unavailable, a confirmation prompt will ask if the <question>daemon</> should be started, which will check for availability every five minutes and send a notification via Pushsafer if availability is found (a Pushsafer account an API key is required for this).
 
-When searching for campgrounds interactively, note that a "-d" appended to the search terms will check for matching campground descriptions, whereas the default is to search for campgrounds by name (more information on description vs. name searches can be found in the help section for the <question>search</> command). 
+When searching for campgrounds interactively, note that a "-d" appended to the search terms will check for matching campground descriptions, whereas the default is to search for campgrounds by name (more information on description vs. name searches can be found in the help section for the <question>search</> command).
 """
 
     def handle(self):
-        campgrounds = self.add_campgrounds()
+        cgs = self.add()
 
-        if not campgrounds:
-            campgrounds = self.add_campgrounds()
+        if not cgs:
+            cgs = self.add()
 
-        if self.selections_empty(campgrounds):
+        if self.none_selected(cgs):
             return 0
 
-        self.print_selections(campgrounds)
+        self.display_selected(cgs)
 
         choice = self.ask("\nWhat now? ([a]dd [r]emove [c]ontinue):")
+
         while choice != "c":
             if choice == "a":
-                new = self.add_campgrounds()
-                campgrounds.update(new)
+                new = self.add()
+                cgs.update(new)
 
             elif choice == "r":
-                subtract = self.choice(
+                to_remove= self.choice(
                     "Select a campground(s) to remove:",
-                    list(campgrounds.keys()),
+                    list(cgs.keys()),
                     multiple=True,
                 )
-                for item in subtract:
-                    del campgrounds[item]
+                for x in to_remove:
+                    del cgs[x]
 
-            self.print_selections(campgrounds)
+            self.display_selected(cgs)
             choice = self.ask("\nWhat now? (a)dd (r)emove (c)ontinue?")
 
-        if self.selections_empty(campgrounds):
+        if self.none_selected(cgs):
             return 0
 
         self.line("")
-        column_width = max(map(len, campgrounds))
+        column_width = max(map(len, cgs))
 
         def month_validator(num):
             if int(num) not in range(1, 13):
@@ -138,7 +147,7 @@ When searching for campgrounds interactively, note that a "-d" appended to the s
 
         self.line("<fg=yellow>Availability</>:")
 
-        for campground in campgrounds.values():
+        for campground in cgs.values():
             try:
                 campground.get_available(dates.request_dates, dates.stay_dates)
 
