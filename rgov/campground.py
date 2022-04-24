@@ -37,7 +37,7 @@ class Campground:
         requests = []
         for date in request_dates:
             url = f"{endpoint}/{self.id_num}/month?"
-            date_query = urlencode("start_date": date})
+            date_query = urlencode({"start_date": date})
             url = url + date_query
             req = Request(url)
             req.add_header("User-Agent", UserAgent().random)
