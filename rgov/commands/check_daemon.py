@@ -1,12 +1,12 @@
-import datetime
-import getpass
 import logging
 import os
 import time
+from urllib.error import HTTPError
 
 import daemon
 from cleo import Command
 from cleo.helpers import argument, option
+
 from rgov import locations, pushsafer
 from rgov.campground import Campground
 from rgov.dates import Dates
@@ -74,10 +74,10 @@ Check if North Rim and Spring Canyon campgrounds have available sites on March 2
             authenticated = pushsafer.validate_key(ps_username, ps_api_key)
         else:
             authenticated = False
-        while authenticated == False:
+        while not authenticated:
             ps_username, ps_api_key = pushsafer.input_credentials()
             authenticated = pushsafer.validate_key(ps_username, ps_api_key)
-            if authenticated == False:
+            if not authenticated:
                 self.line("Invalid credentials.")
             else:
                 if self.confirm("Save for future use?", False):
