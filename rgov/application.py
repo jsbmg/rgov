@@ -1,6 +1,5 @@
-import sys
-
 from cleo import Application
+
 from rgov.commands import check, check_daemon, initialize, run, search
 
 commands = [

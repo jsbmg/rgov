@@ -54,6 +54,7 @@ def validate_key(user: str, key: str) -> bool:
 def gen_notifier_text(cg_availability: dict) -> str:
     msg = ""
     for name, sites in cg_availability.items():
+        n_sites = len(sites)
         available = ", ".join(sites)
         if 0 < n_sites < 10:
             msg += f"{name}: site(s) {available} available!\n"

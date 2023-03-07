@@ -1,7 +1,6 @@
 import logging
 import os
 import time
-from urllib.error import HTTPError
 
 import daemon
 from cleo import Command
@@ -103,7 +102,7 @@ Check if North Rim and Spring Canyon campgrounds have available sites on March 2
                     try:
                         campground.get_available(dates.request_dates, dates.stay_dates)
 
-                    except (HTTPError, IndexError) as error:
+                    except Exception as error:
                         logging.error(error)
                         time.sleep(10)
                         continue

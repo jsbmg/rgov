@@ -32,7 +32,7 @@ class Campground:
         self._url = None
         self._cli_text = None
 
-    def _request(self, request_dates: list, stay_dates: list) -> list:
+    def _request(self, request_dates: list) -> list:
         endpoint = "https://www.recreation.gov/api/camps/availability/campground"
         requests = []
         for date in request_dates:
@@ -64,13 +64,12 @@ class Campground:
         True, then loads campground data from the test file instead of
         from a live request."""
         if test:
-            requests = []
             with open(locations.EXAMPLE_DATA, "r") as f:
                 f = f.read()
                 requests = json.loads(f)
         else:
             try:
-                requests = self._request(request_dates, stay_dates)
+                requests = self._request(request_dates)
             except (HTTPError, KeyError):
                 raise
 
@@ -86,20 +85,20 @@ class Campground:
 
     @property
     def name(self):
-        if not self._name == None:
+        if self._name is not None:
             return self._name
         else:
             sql_statement = """SELECT name FROM campgrounds WHERE id = (?)"""
             try:
                 with contextlib.closing(
-                    sqlite3.connect(locations.FACILITIES_DB)
+                        sqlite3.connect(locations.FACILITIES_DB)
                 ) as con, con, contextlib.closing(con.cursor()) as cur:
                     cur.execute(sql_statement, (self.id_num,))
                     self._name = cur.fetchone()[0].title()
                     if not self._name:
                         raise ValueError(f"{self.id_num} is not a valid id.")
                     return self._name
-            except sqlite.OperationalError:
+            except sqlite3.OperationalError:
                 raise sqlite3.OperationalError(
                     (
                         "Something went wrong "
@@ -110,14 +109,14 @@ class Campground:
 
     @property
     def available(self):
-        if not self._available == None:
+        if self._available is not None:
             return self._available
         else:
             raise AvailabilityNotFoundError
 
     @property
     def url(self):
-        if not self._url == None:
+        if self._url is not None:
             return self._url
         else:
             base_url = "https://www.recreation.gov/camping/campgrounds"

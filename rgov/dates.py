@@ -31,7 +31,7 @@ class Dates:
 
     @property
     def request_dates(self):
-        if not self._request_dates == None:
+        if self._request_dates is not None:
             return self._request_dates
         else:
             dates = []
@@ -47,7 +47,7 @@ class Dates:
 
     @property
     def stay_dates(self):
-        if not self._stay_dates == None:
+        if self._stay_dates is not None:
             return self._stay_dates
         else:
             stay_dates = []

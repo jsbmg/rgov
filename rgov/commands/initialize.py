@@ -9,8 +9,8 @@ import zipfile
 from collections import Counter
 
 from cleo import Command
-from cleo.helpers import option
-from rgov import locations, pushsafer
+
+from rgov import locations
 
 STOPWORDS = Counter(
     [
@@ -1554,6 +1554,56 @@ def cleanhtml(raw_html) -> str:
     return cleantext
 
 
+def delete_temp_files():
+    """
+    Removes the project-local download folder
+    and its contents.
+    """
+    shutil.rmtree(locations.DOWNLOAD_FOLDER)
+
+
+def ensure_download_dir_exists():
+    os.makedirs(locations.DOWNLOAD_FOLDER, exist_ok=True)
+
+
+def unzip_ridb_data():
+    with zipfile.ZipFile(locations.DOWNLOAD_PATH, "r") as zip_ref:
+        zip_ref.extractall(locations.DOWNLOAD_FOLDER)
+
+
+def generate_sqlite_db():
+    os.makedirs(locations.DATA_FOLDER, exist_ok=True)
+    facilities_list = []
+    with open(locations.FACILITIES_CSV_PATH, "r") as in_file:
+        reader = csv.reader(in_file)
+        for row in reader:
+            # filter for reservable campgrounds with a non-empty name entry
+            if row[7] == "Campground" and row[19] == "true" and row[5]:
+                words = cleanhtml(row[6]).lower().split()
+                descriptions = " ".join(
+                    [word for word in words if word not in STOPWORDS]
+                )
+                facilities_list.append([row[0], row[5].lower(), descriptions])
+
+    # sort the entries alphabetically by name so search results are
+    # also alphabetical
+    facilities_list.sort(key=lambda x: x[1])
+
+    if os.path.exists(os.path.join(locations.DATA_FOLDER, "rgov.db")):
+        os.remove(os.path.join(locations.DATA_FOLDER, "rgov.db"))
+
+    with contextlib.closing(
+        sqlite3.connect(locations.FACILITIES_DB)
+    ) as con, con, contextlib.closing(con.cursor()) as cur:
+        cur.execute(
+            """CREATE TABLE campgrounds
+                       (id, name, description)"""
+        )
+        sql_statement = "INSERT INTO campgrounds VALUES (?, ?, ?)"
+        cur.executemany(sql_statement, facilities_list)
+        con.commit()
+
+
 class InitCommand(Command):
 
     _DOWNLOAD_URL = "https://ridb.recreation.gov/downloads/RIDBFullExport_V1_CSV.zip"
@@ -1570,75 +1620,29 @@ Download and (re)build the campground databse:
     $ <info>poetry run rgov init</>
 """
 
-    def ensure_download_dir_exists(self):
-        os.makedirs(locations.DOWNLOAD_FOLDER, exist_ok=True)
-
     def request_ridb_data(self):
         urllib.request.urlretrieve(self._DOWNLOAD_URL, locations.DOWNLOAD_PATH)
 
-    def unzip_ridb_data(self):
-        with zipfile.ZipFile(locations.DOWNLOAD_PATH, "r") as zip_ref:
-            zip_ref.extractall(locations.DOWNLOAD_FOLDER)
-
-    def generate_sqlite_db(self):
-        os.makedirs(locations.DATA_FOLDER, exist_ok=True)
-        facilities_list = []
-        with open(locations.FACILITIES_CSV_PATH, "r") as in_file:
-            reader = csv.reader(in_file)
-            for row in reader:
-                # filter for reservable campgrounds with a non-empty name entry
-                if row[7] == "Campground" and row[19] == "true" and row[5]:
-                    words = cleanhtml(row[6]).lower().split()
-                    descriptions = " ".join(
-                        [word for word in words if word not in STOPWORDS]
-                    )
-                    facilities_list.append([row[0], row[5].lower(), descriptions])
-
-        # sort the entries alphabetically by name so search results are
-        # also alphabetical
-        facilities_list.sort(key=lambda x: x[1])
-
-        if os.path.exists(os.path.join(locations.DATA_FOLDER, "rgov.db")):
-            os.remove(os.path.join(locations.DATA_FOLDER, "rgov.db"))
-
-        with contextlib.closing(
-            sqlite3.connect(locations.FACILITIES_DB)
-        ) as con, con, contextlib.closing(con.cursor()) as cur:
-            cur.execute(
-                """CREATE TABLE campgrounds
-                           (id, name, description)"""
-            )
-            sql_statement = "INSERT INTO campgrounds VALUES (?, ?, ?)"
-            cur.executemany(sql_statement, facilities_list)
-            con.commit()
-
-    def delete_temp_files(self):
-        """
-        Removes the project-local downlaod folder
-        and its contents.
-        """
-        shutil.rmtree(locations.DOWNLOAD_FOLDER)
-
     def handle(self) -> int:
         steps = [
-            ("Checking download directory", self.ensure_download_dir_exists),
+            ("Checking download directory", ensure_download_dir_exists),
             (f"Downloading data from {self._DOWNLOAD_URL}", self.request_ridb_data),
-            ("Unzipping", self.unzip_ridb_data),
-            ("Generating database", self.generate_sqlite_db),
-            ("Deleting temporary files", self.delete_temp_files),
+            ("Unzipping", unzip_ridb_data),
+            ("Generating database", generate_sqlite_db),
+            ("Deleting temporary files", delete_temp_files),
         ]
 
         if not self.confirm(
             "Continue with downloading and generating the campsite id index?", False
         ):
-            return
+            return 0
 
         for step in steps:
-            format = f"<question>{step[0]}...</question>"
+            console_format = f"<question>{step[0]}...</question>"
             self.line("")
-            self.write(format)
+            self.write(console_format)
             step[1]()
-            self.overwrite(format + f"<comment>done</comment>.")
+            self.overwrite(console_format + f"<comment>done</comment>.")
 
         self.line("")
         return 0

@@ -14,13 +14,13 @@ class RunCommand(Command):
         Returns a dictionary of campgrounds, empty if no selections made.
         """
         parks = {}
-        input = self.ask("Search for campgrounds:")
-        if not input:
+        user_input = self.ask("Search for campgrounds:")
+        if not user_input:
             return parks
 
         # If the last search term is '-d', search for the terms
         # in the campground descriptions
-        words = input.split(" ")
+        words = user_input.split(" ")
         if words[-1] == "-d":
             descriptions = True
             del words[-1]
@@ -33,12 +33,12 @@ class RunCommand(Command):
         if results:
             # Select campgrounds from the results list
             results["(none of the above)"] = ""
-            input = self.choice(
+            user_input = self.choice(
                 "Select campground(s)",
                 list(results.keys()),
                 multiple=True
             )
-            for cg in input:
+            for cg in user_input:
                 if cg == "(none of the above)":
                     pass
                 else:
@@ -46,7 +46,7 @@ class RunCommand(Command):
                     parks[cg] = Campground(results[cg])
 
         else:
-            msg = f"No results for {input}. " 'Try appending "-d".'
+            msg = f"No results for {user_input}. " 'Try appending "-d".'
             self.line(msg)
 
         return parks
