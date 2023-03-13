@@ -138,9 +138,11 @@ Check if North Rim and Spring Canyon campgrounds have available sites on March 2
                         logging.info(f"Pushsafer: {pushsafer_status}")
                     notification_counter += 1
                 elif any_combo:
+                    logging.info(f"Checking for cross-site/cross-campground availability")
                     dates_dict = utils.check_for_combo_availability(dates, per_date_availability)
 
                     if dates_dict is not None:
+                        logging.info(f"Found availability accross sites. Sending pushsafer notification")
                         message = pushsafer.gen_any_combo_notifier_text(dates_dict, dates.stay_dates)
                         pushsafer_status = pushsafer.notify(ps_api_key, "a", message)
                         if pushsafer_status["status"] == 0:
