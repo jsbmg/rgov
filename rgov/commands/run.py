@@ -171,6 +171,11 @@ When searching for campgrounds interactively, note that a "-d" appended to the s
             if not self.confirm(daemon_question, False):
                 return
             else:
+                if not self.confirm("Check for availability across multiple sites/campgrounds?", False):
+                    any_combo = ""
+                else:
+                    any_combo = "--any-combo"
+
                 ids = " ".join(unavailable)
-                args = f"{date_input} {length_input} {ids}"
+                args = f"{date_input} {length_input} {ids} {any_combo}"
                 self.call("daemon", args)

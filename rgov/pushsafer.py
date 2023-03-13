@@ -1,7 +1,8 @@
 import getpass
 import json
 import os
-from pathlib import Path
+from datetime import datetime
+
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
@@ -63,6 +64,19 @@ def gen_notifier_text(cg_availability: dict) -> str:
             msg += f"{name}: {n_sites} sites available!\n"
     return msg
 
+def gen_any_combo_notifier_text(dates_breakdown, stay_dates):
+    msg = ""
+    for date in stay_dates:
+        msg += datetime.strptime(date, '%Y-%m-%dT00:00:00Z').strftime('%B %d, %Y')
+
+        for campground in dates_breakdown[date]:
+            output = ", ".join(sorted([str(int(n)) for n in dates_breakdown[date][campground]]))
+            msg += f"\n{campground}"
+            msg += f"\n{output}"
+
+        msg += "\n\n"
+
+    return msg
 
 def notify(key: str, device: str, msg: str, url=None) -> dict:
     endpoint = "https://www.pushsafer.com/api"

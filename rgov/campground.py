@@ -29,10 +29,12 @@ class Campground:
         self.id_num = id_num
         self._name = None
         self._available = None
+        self._dates_available = None
         self._url = None
         self._cli_text = None
+        self._request_data = None
 
-    def _request(self, request_dates: list) -> list:
+    def _request(self, request_dates: list):
         endpoint = "https://www.recreation.gov/api/camps/availability/campground"
         requests = []
         for date in request_dates:
@@ -57,7 +59,7 @@ class Campground:
 
             requests.append(campsites)
 
-        return requests
+        self._request_data = requests
 
     def get_available(self, request_dates: list, stay_dates: list, test=False):
         """Finds available sites, if any, at the campground. If test is
@@ -66,22 +68,33 @@ class Campground:
         if test:
             with open(locations.EXAMPLE_DATA, "r") as f:
                 f = f.read()
-                requests = json.loads(f)
+                self._request_data = json.loads(f)
         else:
-            try:
-                requests = self._request(request_dates)
-            except (HTTPError, KeyError):
-                raise
+            if self._request_data is None:
+                try:
+                    self._request(request_dates)
+                except (HTTPError, KeyError):
+                    raise
 
-        d = defaultdict(int)
-        for request in requests:
+        d = defaultdict(list)
+        m = defaultdict(int)
+        for request in self._request_data:
             for site in request.values():
                 for date in stay_dates:
                     if date in site["availabilities"]:
                         if site["availabilities"][date] == "Available":
-                            d[site["site"]] += 1
+                            d[date].append(site["site"])
+                            m[site["site"]] += 1
 
-        self._available = [k for k, v in d.items() if v == len(stay_dates)]
+        self._dates_available = d
+        self._available = [k for k, v in m.items() if v == len(stay_dates)]
+
+    @property
+    def per_date_availability(self):
+        if self._available is not None:
+            return self._dates_available
+        else:
+            raise AvailabilityNotFoundError
 
     @property
     def name(self):

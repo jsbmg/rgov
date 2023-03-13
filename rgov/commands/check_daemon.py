@@ -3,18 +3,19 @@ import os
 import time
 
 import daemon
+
 from cleo import Command
 from cleo.helpers import argument, option
 
 from rgov import locations, pushsafer
 from rgov.campground import Campground
 from rgov.dates import Dates
+from rgov import utils
 
 
 class DaemonCommand(Command):
-
     name = "daemon"
-    description = "Start a daemon that checks for availablity automatically"
+    description = "Start a daemon that checks for availability automatically"
 
     help = """The <question>daemon</> command starts a Unix daemon that checks for campground availability every five minutes. If one or more campground(s) are found to have available sites, a Pushsafer notification is sent with a summary of which campground(s) are currently available.
 
@@ -52,12 +53,18 @@ Check if North Rim and Spring Canyon campgrounds have available sites on March 2
             flag=False,
             value_required=True,
         ),
+        option(
+            "any-combo",
+            "a",
+            "Notify if there is any contiguous availability across different sites"
+        )
     ]
 
     def handle(self) -> int:
         id_input = self.argument("id")
         date_input = self.argument("date")
         length_input = self.argument("length")
+        any_combo = self.option("any-combo")
 
         if self.option("notify-limit"):
             notify_limit = int(self.option("notify-limit"))
@@ -97,7 +104,10 @@ Check if North Rim and Spring Canyon campgrounds have available sites on March 2
 
             while True:
                 logging.info("------------checking------------")
+
                 available = {}
+                per_date_availability = {}
+                found_available_sites = False
                 for campground in campgrounds:
                     try:
                         campground.get_available(dates.request_dates, dates.stay_dates)
@@ -107,9 +117,12 @@ Check if North Rim and Spring Canyon campgrounds have available sites on March 2
                         time.sleep(10)
                         continue
 
+                    per_date_availability[campground.name] = campground.per_date_availability
+
                     if len(campground.available) > 0:
                         logging.info(f"{campground.name} - found available site(s)")
                         available[campground.name] = campground.available
+                        found_available_sites = True
                     else:
                         logging.info(f"{campground.name} - no available site(s)")
 
@@ -124,6 +137,17 @@ Check if North Rim and Spring Canyon campgrounds have available sites on March 2
                     else:
                         logging.info(f"Pushsafer: {pushsafer_status}")
                     notification_counter += 1
+                elif any_combo:
+                    dates_dict = utils.check_for_combo_availability(dates, per_date_availability)
+
+                    if dates_dict is not None:
+                        message = pushsafer.gen_any_combo_notifier_text(dates_dict, dates.stay_dates)
+                        pushsafer_status = pushsafer.notify(ps_api_key, "a", message)
+                        if pushsafer_status["status"] == 0:
+                            logging.error(f"Pushsafer: {pushsafer_status}")
+                        else:
+                            logging.info(f"Pushsafer: {pushsafer_status}")
+
                 if notification_counter == notify_limit:
                     reached_notify_limit = (
                         "notification limit reached "

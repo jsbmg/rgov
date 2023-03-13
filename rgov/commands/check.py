@@ -1,8 +1,10 @@
+from datetime import datetime
 from urllib.error import HTTPError
 
 from cleo import Command
 from cleo.helpers import argument, option
 
+from rgov import utils
 from rgov.campground import Campground
 from rgov.dates import Dates
 
@@ -47,15 +49,37 @@ Check if North Rim and Spring Canyon campgrounds have available sites on March 2
 
         column_width = max([len(c.name) for c in campgrounds])
 
+        per_date_availability = {}
+        found_available_sites = False
         for campground in campgrounds:
             try:
                 campground.get_available(dates.request_dates, dates.stay_dates)
+                if len(campground.available) > 0:
+                    found_available_sites = True
 
             except (HTTPError, IndexError) as error:
                 self.line(campground.gen_cli_text(column_width, error))
                 continue
 
             self.line(campground.gen_cli_text(column_width))
+
+            per_date_availability[campground.name] = campground.per_date_availability
+
+        if found_available_sites is False:
+            dates_dict = utils.check_for_combo_availability(dates, per_date_availability)
+
+            if dates_dict is not None:
+                self.line(" ")
+                self.line("No contiguous availability at any one site. However, there are available sites each day of "
+                             "your stay:")
+                self.line(" ")
+                for date in dates.stay_dates:
+                    self.line(f"<fg=cyan>{datetime.strptime(date, '%Y-%m-%dT00:00:00Z').strftime('%B %d, %Y')}</>")
+                    for campground in dates_dict[date]:
+                        output = ", ".join(sorted([str(int(n)) for n in dates_dict[date][campground]]))
+                        self.line(f"<fg=magenta>{campground}</>")
+                        self.line(output)
+                    self.line(" ")
 
         if self.option("cron-mode"):
             self.line("Not yet implemented.")
