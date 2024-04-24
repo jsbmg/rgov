@@ -78,8 +78,9 @@ def gen_any_combo_notifier_text(dates_breakdown, stay_dates):
 
     return msg
 
-def notify(key: str, device: str, msg: str, url=None) -> dict:
+def notify(key: str, device: str, msg: str, priority: str, url=None) -> dict:
     endpoint = "https://www.pushsafer.com/api"
+
     post_fields = {
         "d": device,
         "t": "Campsite Availability Update",
@@ -89,6 +90,7 @@ def notify(key: str, device: str, msg: str, url=None) -> dict:
         "i": 33,
         "c": "#FF0000",
         "k": key,
+        "pr": priority
     }
     if url:
         post_fields["u"] = url

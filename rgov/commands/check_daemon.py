@@ -56,8 +56,22 @@ Check if North Rim and Spring Canyon campgrounds have available sites on March 2
         option(
             "any-combo",
             "a",
-            "Notify if there is any contiguous availability across different sites"
-        )
+            "Notify if there is any contiguous availability across different sites",
+        ),
+        option(
+            "priority",
+            "p",
+            "Set the priority for the notification, between -2 and 2.",
+            flag=False,
+            value_required=True,
+        ),
+        option(
+            "interval",
+            "i",
+            "Number of seconds between checking (minimum 30)",
+            flag=False,
+            value_required=True,
+        ),
     ]
 
     def handle(self) -> int:
@@ -71,6 +85,24 @@ Check if North Rim and Spring Canyon campgrounds have available sites on March 2
         else:
             notify_limit = 3
 
+        if self.option("priority"):
+            priority = int(self.option("priority"))
+
+            if priority > 2 or priority < -2:
+                self.line("Priority should be between -2 and 2.")
+                return 1
+        else:
+            priority = 0
+
+        if self.option("interval"):
+            interval = int(self.option("interval"))
+
+            if (interval) < 30:
+                self.line("Interval must be greater than 30.")
+                return 1
+        else:
+            interval = 300  # wait 5 minutes before checking again
+
         dates = Dates(date_input, length_input)
         campgrounds = [Campground(id) for id in id_input]
 
@@ -80,9 +112,11 @@ Check if North Rim and Spring Canyon campgrounds have available sites on March 2
             authenticated = pushsafer.validate_key(ps_username, ps_api_key)
         else:
             authenticated = False
+
         while not authenticated:
             ps_username, ps_api_key = pushsafer.input_credentials()
             authenticated = pushsafer.validate_key(ps_username, ps_api_key)
+
             if not authenticated:
                 self.line("Invalid credentials.")
             else:
@@ -117,7 +151,9 @@ Check if North Rim and Spring Canyon campgrounds have available sites on March 2
                         time.sleep(10)
                         continue
 
-                    per_date_availability[campground.name] = campground.per_date_availability
+                    per_date_availability[campground.name] = (
+                        campground.per_date_availability
+                    )
 
                     if len(campground.available) > 0:
                         logging.info(f"{campground.name} - found available site(s)")
@@ -131,24 +167,46 @@ Check if North Rim and Spring Canyon campgrounds have available sites on March 2
 
                 if available:
                     message = pushsafer.gen_notifier_text(available)
-                    pushsafer_status = pushsafer.notify(ps_api_key, "a", message)
+
+                    pushsafer_status = pushsafer.notify(
+                        ps_api_key, "a", message, critical
+                    )
+
                     if pushsafer_status["status"] == 0:
                         logging.error(f"Pushsafer: {pushsafer_status}")
                     else:
                         logging.info(f"Pushsafer: {pushsafer_status}")
+
                     notification_counter += 1
+
                 elif any_combo:
-                    logging.info(f"Checking for cross-site/cross-campground availability")
-                    dates_dict = utils.check_for_combo_availability(dates, per_date_availability)
+                    logging.info(
+                        f"Checking for cross-site/cross-campground availability"
+                    )
+
+                    dates_dict = utils.check_for_combo_availability(
+                        dates, per_date_availability
+                    )
 
                     if dates_dict is not None:
-                        logging.info(f"Found availability accross sites. Sending pushsafer notification")
-                        message = pushsafer.gen_any_combo_notifier_text(dates_dict, dates.stay_dates)
-                        pushsafer_status = pushsafer.notify(ps_api_key, "a", message)
+                        logging.info(
+                            f"Found availability accross sites. Sending pushsafer notification"
+                        )
+
+                        message = pushsafer.gen_any_combo_notifier_text(
+                            dates_dict, dates.stay_dates
+                        )
+
+                        pushsafer_status = pushsafer.notify(
+                            ps_api_key, "a", message, critical
+                        )
+
                         if pushsafer_status["status"] == 0:
                             logging.error(f"Pushsafer: {pushsafer_status}")
                         else:
                             logging.info(f"Pushsafer: {pushsafer_status}")
+
+                        notification_counter += 1
 
                 if notification_counter == notify_limit:
                     reached_notify_limit = (
@@ -156,7 +214,9 @@ Check if North Rim and Spring Canyon campgrounds have available sites on March 2
                         f"[{notification_counter}/"
                         f"{notify_limit}] - exiting"
                     )
+
                     logging.info(reached_notify_limit)
+
                     return 0
 
-                time.sleep(300)  # wait 5 minutes before rechecking
+                time.sleep(interval)
